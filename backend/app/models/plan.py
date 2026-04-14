@@ -1,4 +1,4 @@
-from app import db
+from app.extensions import db
 from .base import TimestampMixin
 
 class MembershipPlan(db.Model, TimestampMixin):
