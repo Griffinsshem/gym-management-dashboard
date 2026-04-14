@@ -1,14 +1,8 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_bcrypt import Bcrypt
 from dotenv import load_dotenv
-from app import models
 import os
 
-db = SQLAlchemy()
-migrate = Migrate()
-bcrypt = Bcrypt()
+from app.extensions import db, migrate, bcrypt
 
 def create_app():
     load_dotenv()
@@ -16,12 +10,14 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(os.getenv("FLASK_CONFIG", "config.DevelopmentConfig"))
 
-    # Initialize extensions
+    # Init extensions
     db.init_app(app)
     migrate.init_app(app, db)
     bcrypt.init_app(app)
-    
-    # Health check route
+
+    # Import models AFTER db init (important)
+    from app import models
+
     @app.route("/")
     def health():
         return {"status": "ok"}
