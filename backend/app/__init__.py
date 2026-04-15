@@ -18,6 +18,14 @@ def create_app():
     # Import models AFTER db init (important)
     from app import models
 
+    # Register Blueprints
+    from app.api.auth.routes import auth_bp
+    from app.api.members.routes import member_bp
+
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(member_bp)
+
+    # Health check
     @app.route("/")
     def health():
         return {"status": "ok"}
