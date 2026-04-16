@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app.services.member_service import MemberService
-from app.utils.decorators import require_auth
+from app.utils.decorators import require_auth, require_role
 
 member_bp = Blueprint("members", __name__, url_prefix="/api/v1/members")
 member_service = MemberService()
@@ -92,6 +92,7 @@ def update_member(id):
 
 @member_bp.route("/<int:id>", methods=["DELETE"])
 @require_auth
+@require_role("admin")
 def delete_member(id):
     try:
         member_service.deactivate_member(id)
