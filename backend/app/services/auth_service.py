@@ -1,5 +1,7 @@
 from app.repositories.user_repository import UserRepository
 from app.extensions import bcrypt
+from app.utils.token import generate_access_token
+
 
 class AuthService:
     def __init__(self):
@@ -32,4 +34,10 @@ class AuthService:
         if not bcrypt.check_password_hash(user.password_hash, password):
             raise ValueError("Invalid credentials")
 
-        return user
+        # Generate JWT token
+        access_token = generate_access_token(user)
+
+        return {
+            "user": user,
+            "access_token": access_token
+        }
