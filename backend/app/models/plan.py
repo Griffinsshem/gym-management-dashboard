@@ -10,3 +10,4 @@ class MembershipPlan(db.Model, TimestampMixin):
     price_kes = db.Column(db.Float, nullable=False)
     duration_days = db.Column(db.Integer, nullable=False)
     is_active = db.Column(db.Boolean, default=True)
+    subscription = db.relationship("subscription", backref="plan", lazy=True)
