@@ -1,51 +1,41 @@
 from functools import wraps
-from flask import request, jsonify
+from flask import request, jsonify, g
 from app.utils.token import decode_token
 
-def require_auth(f):
+
+def jwt_required(f):
     @wraps(f)
-    def wrapper(*args, **kwargs):
+    def decorated(*args, **kwargs):
         auth_header = request.headers.get("Authorization")
 
         if not auth_header:
-            return jsonify({
-                "success": False,
-                "error": "Authorization header missing"
-            }), 401
+            return jsonify({"success": False, "error": "Missing token"}), 401
 
         try:
             token = auth_header.split(" ")[1]
-            user_data = decode_token(token)
-            request.user = user_data
+            payload = decode_token(token)
 
-        except Exception as e:
-            return jsonify({
-                "success": False,
-                "error": str(e)
-            }), 401
+            # Store user info globally for request
+            g.user = payload
+
+        except Exception:
+            return jsonify({"success": False, "error": "Invalid token"}), 401
 
         return f(*args, **kwargs)
 
-    return wrapper
+    return decorated
 
-def require_role(role):
-    def decorator(f):
+
+def roles_required(*roles):
+    def wrapper(f):
         @wraps(f)
-        def wrapper(*args, **kwargs):
-            user = getattr(request, "user", None)
+        def decorated(*args, **kwargs):
+            user_role = g.user.get("role")
 
-            if not user:
-                return jsonify({
-                    "success": False,
-                    "error": "Unauthorized"
-                }), 401
-
-            if user.get("role") != role:
-                return jsonify({
-                    "success": False,
-                    "error": "Forbidden"
-                }), 403
+            if user_role not in roles:
+                return jsonify({"success": False, "error": "Forbidden"}), 403
 
             return f(*args, **kwargs)
-        return wrapper
-    return decorator
+
+        return decorated
+    return wrapper
