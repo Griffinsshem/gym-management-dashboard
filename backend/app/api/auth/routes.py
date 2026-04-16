@@ -35,7 +35,7 @@ def login():
     data = request.get_json()
 
     try:
-        user = auth_service.login_user(
+        result = auth_service.login_user(
             email=data.get("email"),
             password=data.get("password")
         )
@@ -43,8 +43,9 @@ def login():
         return jsonify({
             "success": True,
             "data": {
-                "id": user.id,
-                "email": user.email
+                "id": result["user"].id,
+                "email": result["user"].email,
+                "access_token": result["access_token"]
             }
         })
 
