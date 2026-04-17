@@ -1,8 +1,6 @@
-# app/api/membership_plans/routes.py
-
 from flask import Blueprint, request, jsonify
 from app.services.membership_plan_service import MembershipPlanService
-from app.utils.decorators import jwt_required, roles_required
+from app.utils.decorators import jwt_required, require_role
 
 plans_bp = Blueprint("plans", __name__, url_prefix="/api/v1/plans")
 
@@ -10,7 +8,7 @@ plan_service = MembershipPlanService()
 
 @plans_bp.route("", methods=["POST"])
 @jwt_required
-@roles_required("admin")
+@require_role("admin")
 def create_plan():
     data = request.get_json()
 
