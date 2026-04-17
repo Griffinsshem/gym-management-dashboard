@@ -6,30 +6,36 @@ plans_bp = Blueprint("plans", __name__, url_prefix="/api/v1/plans")
 
 plan_service = MembershipPlanService()
 
+
 @plans_bp.route("", methods=["POST"])
 @jwt_required
 @require_role("admin")
 def create_plan():
     data = request.get_json()
 
-    plan = plan_service.create_plan(
-        name=data.get("name"),
-        price=data.get("price"),
-        duration_days=data.get("duration_days")
-    )
+    try:
+        plan = plan_service.create_plan(
+            name=data.get("name"),
+            description=data.get("description"),
+            price_kes=data.get("price_kes"),
+            duration_days=data.get("duration_days")
+        )
 
-    return jsonify({
-        "success": True,
-        "data": {
-            "id": plan.id,
-            "name": plan.name,
-            "price": plan.price
-        }
-    }), 201
+        return jsonify({
+            "success": True,
+            "data": {
+                "id": plan.id,
+                "name": plan.name,
+                "price_kes": plan.price_kes
+            }
+        }), 201
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+
 
 
 @plans_bp.route("", methods=["GET"])
-@jwt_required
 def get_plans():
     plans = plan_service.get_plans()
 
@@ -39,8 +45,67 @@ def get_plans():
             {
                 "id": p.id,
                 "name": p.name,
-                "price": p.price,
+                "price_kes": p.price_kes,
                 "duration_days": p.duration_days
-            } for p in plans
+            }
+            for p in plans
         ]
     })
+
+
+
+@plans_bp.route("/<int:plan_id>", methods=["GET"])
+def get_plan(plan_id):
+    try:
+        plan = plan_service.get_plan(plan_id)
+
+        return jsonify({
+            "success": True,
+            "data": {
+                "id": plan.id,
+                "name": plan.name,
+                "price_kes": plan.price_kes,
+                "duration_days": plan.duration_days
+            }
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 404
+
+
+
+@plans_bp.route("/<int:plan_id>", methods=["PATCH"])
+@jwt_required
+@require_role("admin")
+def update_plan(plan_id):
+    data = request.get_json()
+
+    try:
+        plan = plan_service.update_plan(plan_id, data)
+
+        return jsonify({
+            "success": True,
+            "data": {
+                "id": plan.id,
+                "name": plan.name
+            }
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+
+
+@plans_bp.route("/<int:plan_id>", methods=["DELETE"])
+@jwt_required
+@require_role("admin")
+def deactivate_plan(plan_id):
+    try:
+        plan_service.deactivate_plan(plan_id)
+
+        return jsonify({
+            "success": True,
+            "message": "Plan deactivated"
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 400
