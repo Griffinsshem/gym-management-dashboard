@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import request, jsonify, g
+from flask import request, jsonify
 from app.utils.token import decode_token
 
 
@@ -9,30 +9,30 @@ def jwt_required(f):
         auth_header = request.headers.get("Authorization")
 
         if not auth_header:
-            return jsonify({"success": False, "error": "Missing token"}), 401
+            return jsonify({"success": False, "error": "Authorization header missing"}), 401
 
         try:
             token = auth_header.split(" ")[1]
             payload = decode_token(token)
-
-            # Store user info globally for request
-            g.user = payload
-
+            request.user = payload  # attach user to request
         except Exception:
-            return jsonify({"success": False, "error": "Invalid token"}), 401
+            return jsonify({"success": False, "error": "Invalid or expired token"}), 401
 
         return f(*args, **kwargs)
 
     return decorated
 
 
-def roles_required(*roles):
+def require_role(*roles):
     def wrapper(f):
         @wraps(f)
         def decorated(*args, **kwargs):
-            user_role = g.user.get("role")
+            user = getattr(request, "user", None)
 
-            if user_role not in roles:
+            if not user:
+                return jsonify({"success": False, "error": "Unauthorized"}), 401
+
+            if user.get("role") not in roles:
                 return jsonify({"success": False, "error": "Forbidden"}), 403
 
             return f(*args, **kwargs)
