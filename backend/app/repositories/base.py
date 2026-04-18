@@ -7,7 +7,7 @@ class BaseRepository:
         return self.model.query.all()
 
     def get_by_id(self, id):
-        return self.model.query.get(id)
+        return self.model.query.filter_by(id=id).first()
 
     def create(self, data):
         instance = self.model(**data)
@@ -22,5 +22,11 @@ class BaseRepository:
         return instance
 
     def delete(self, instance):
-        db.session.delete(instance)
+        # Soft delete if model has is_active
+        if hasattr(instance, "is_active"):
+            instance.is_active = False
+        else:
+            db.session.delete(instance)
+
         db.session.commit()
+        return instance
