@@ -1,5 +1,5 @@
 from app.models import Member
-from app.repositories.base_repository import BaseRepository
+from app.repositories.base import BaseRepository
 
 
 class MemberRepository(BaseRepository):
