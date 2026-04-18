@@ -7,40 +7,45 @@ member_service = MemberService()
 
 
 @member_bp.route("", methods=["POST"])
+@jwt_required
+@require_role("admin")
 def create_member():
     data = request.get_json()
 
     try:
-        member = member_service.create_member(data)
+        member = member_service.create_member(
+            full_name=data.get("full_name"),
+            phone=data.get("phone"),
+            email=data.get("email"),
+            gender=data.get("gender"),
+            date_of_birth=data.get("date_of_birth")
+        )
 
         return jsonify({
             "success": True,
             "data": {
                 "id": member.id,
-                "first_name": member.first_name,
-                "last_name": member.last_name
+                "full_name": member.full_name,
+                "phone": member.phone
             }
         }), 201
 
     except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 400
+        return jsonify({"success": False, "error": str(e)}), 400
 
 
 @member_bp.route("", methods=["GET"])
 @jwt_required
 def list_members():
-    members = member_service.list_members()
+    members = member_service.get_members()
 
     return jsonify({
         "success": True,
         "data": [
             {
                 "id": m.id,
-                "first_name": m.first_name,
-                "last_name": m.last_name
+                "full_name": m.full_name,
+                "phone": m.phone
             } for m in members
         ]
     })
@@ -56,20 +61,18 @@ def get_member(id):
             "success": True,
             "data": {
                 "id": member.id,
-                "first_name": member.first_name,
-                "last_name": member.last_name
+                "full_name": member.full_name,
+                "phone": member.phone
             }
         })
 
     except ValueError as e:
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 404
+        return jsonify({"success": False, "error": str(e)}), 404
 
 
 @member_bp.route("/<int:id>", methods=["PATCH"])
 @jwt_required
+@require_role("admin")
 def update_member(id):
     data = request.get_json()
 
@@ -79,15 +82,13 @@ def update_member(id):
         return jsonify({
             "success": True,
             "data": {
-                "id": member.id
+                "id": member.id,
+                "full_name": member.full_name
             }
         })
 
     except ValueError as e:
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 404
+        return jsonify({"success": False, "error": str(e)}), 404
 
 
 @member_bp.route("/<int:id>", methods=["DELETE"])
@@ -103,7 +104,4 @@ def delete_member(id):
         })
 
     except ValueError as e:
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 404
+        return jsonify({"success": False, "error": str(e)}), 404
