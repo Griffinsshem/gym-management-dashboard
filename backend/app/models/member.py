@@ -14,3 +14,4 @@ class Member(db.Model, TimestampMixin):
     is_active = db.Column(db.Boolean, default=True)
 
     subscriptions = db.relationship("MembershipSubscription", backref="member", lazy=True)
+    attendance = db.relationship("Attendance", backref="member", lazy=True)
