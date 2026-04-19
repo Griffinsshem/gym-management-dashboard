@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import os
 from app.api.membership_plans.routes import plans_bp
 from app.api.subscriptions.routes import subscriptions_bp
+from app.api.attendance.routes import attendance_bp
 from app.extensions import db, migrate, bcrypt
 
 def create_app():
@@ -27,6 +28,7 @@ def create_app():
     app.register_blueprint(member_bp)
     app.register_blueprint(plans_bp)
     app.register_blueprint(subscriptions_bp)
+    app.register_blueprint(attendance_bp)
 
     # Health check
     @app.route("/")
