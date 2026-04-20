@@ -41,4 +41,13 @@ class AttendanceService:
         if not member:
             raise ValueError("Member not found")
 
-        return self.attendance_repo.get_by_member(member_id)
+        records = self.attendance_repo.get_by_member_id(member_id)
+
+        return [
+            {
+                "id": r.id,
+                "check_in_time": r.check_in_time,
+                "check_out_time": r.check_out_time
+            }
+            for r in records
+        ]
