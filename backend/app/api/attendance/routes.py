@@ -87,7 +87,7 @@ def check_out():
 
 @attendance_bp.route("/member/<int:member_id>", methods=["GET"])
 @jwt_required
-def get_member_attendance(member_id):
+def get_member_attendance_history(member_id):
     try:
         records = attendance_service.get_member_attendance(member_id)
 
