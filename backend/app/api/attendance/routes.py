@@ -57,3 +57,29 @@ def get_member_attendance(member_id):
             "success": False,
             "error": str(e)
         }), 404
+
+
+@attendance_bp.route("/check-out", methods=["POST"])
+@jwt_required
+def check_out():
+    data = request.get_json()
+
+    try:
+        attendance = attendance_service.check_out(
+            member_id=data.get("member_id")
+        )
+
+        return jsonify({
+            "success": True,
+            "data": {
+                "id": attendance.id,
+                "member_id": attendance.member_id,
+                "check_out_time": attendance.check_out_time
+            }
+        })
+
+    except ValueError as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 400
