@@ -43,13 +43,7 @@ def get_member_attendance(member_id):
 
         return jsonify({
             "success": True,
-            "data": [
-                {
-                    "id": r.id,
-                    "member_id": r.member_id,
-                    "check_in_time": r.check_in_time
-                } for r in records
-            ]
+            "data": records
         })
 
     except ValueError as e:
