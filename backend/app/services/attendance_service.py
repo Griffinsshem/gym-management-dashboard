@@ -13,10 +13,26 @@ class AttendanceService:
         if not member:
             raise ValueError("Member not found")
 
+        # 🚫 Prevent duplicate check-in
+        existing = self.attendance_repo.get_active_check_in(member_id)
+        if existing:
+            raise ValueError("Member already checked in")
+
         attendance = self.attendance_repo.create({
             "member_id": member_id,
             "check_in_time": datetime.utcnow()
         })
+
+        return attendance
+
+    def check_out(self, member_id):
+        attendance = self.attendance_repo.get_active_check_in(member_id)
+
+        if not attendance:
+            raise ValueError("No active check-in found")
+
+        attendance.check_out_time = datetime.utcnow()
+        self.attendance_repo.update(attendance, {})
 
         return attendance
 
