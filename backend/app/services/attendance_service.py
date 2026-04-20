@@ -13,7 +13,6 @@ class AttendanceService:
         if not member:
             raise ValueError("Member not found")
 
-        # 🚫 Prevent duplicate check-in
         existing = self.attendance_repo.get_active_check_in(member_id)
         if existing:
             raise ValueError("Member already checked in")
@@ -41,7 +40,7 @@ class AttendanceService:
         if not member:
             raise ValueError("Member not found")
 
-        records = self.attendance_repo.get_by_member_id(member_id)
+        records = self.attendance_repo.get_by_member(member_id)
 
         return [
             {
