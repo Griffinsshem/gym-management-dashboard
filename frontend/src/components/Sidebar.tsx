@@ -8,16 +8,16 @@ export default function Sidebar() {
   const { logout } = useAuth();
 
   return (
-    <div className="h-screen w-64 bg-gray-900 text-white flex flex-col p-4">
+    <div className="h-screen w-64 bg-gray-900 text-white flex flex-col p-5 shadow-lg">
       <h1 className="text-2xl font-bold mb-10">GymPro</h1>
 
-      <nav className="flex flex-col gap-4">
-        <Link href="/dashboard" className="flex items-center gap-2 hover:text-gray-300">
+      <nav className="flex flex-col gap-2">
+        <Link href="/dashboard" className="flex items-center gap-3 p-2 rounded-lg bg-gray-800">
           <LayoutDashboard size={18} />
           Dashboard
         </Link>
 
-        <Link href="#" className="flex items-center gap-2 hover:text-gray-300">
+        <Link href="#" className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-800">
           <Users size={18} />
           Members
         </Link>
