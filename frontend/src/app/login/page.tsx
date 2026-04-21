@@ -19,18 +19,18 @@ export default function LoginPage() {
 
   return (
     <div className="h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-2xl shadow-lg w-80">
-        <h2 className="text-2xl font-bold mb-6">Login</h2>
+      <div className="bg-white p-8 rounded-2xl shadow-lg w-80 border border-gray-300">
+        <h2 className="text-2xl font-bold mb-6 text-gray-800">Login</h2>
 
         <input
-          className="w-full mb-3 p-2 border rounded"
+          className="w-full mb-3 p-2 border rounded text-gray-700"
           placeholder="Email"
           onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
 
         <input
           type="password"
-          className="w-full mb-4 p-2 border rounded"
+          className="w-full mb-4 p-2 border rounded text-gray-700"
           placeholder="Password"
           onChange={(e) => setForm({ ...form, password: e.target.value })}
         />
