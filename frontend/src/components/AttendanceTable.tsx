@@ -4,23 +4,26 @@ type Props = {
 
 export default function AttendanceTable({ data }: Props) {
   return (
-    <div className="bg-white rounded-2xl shadow p-4 mt-6">
-      <h3 className="text-lg font-semibold mb-4">Attendance</h3>
+    <div className="bg-white rounded-2xl shadow-sm border p-6 mt-8">
+      <h3 className="text-lg font-semibold mb-4 text-gray-900">Attendance</h3>
 
-      <table className="w-full text-left">
+      <table className="w-full text-sm">
         <thead>
-          <tr className="text-gray-500 text-sm">
-            <th>ID</th>
-            <th>Check In</th>
-            <th>Check Out</th>
+          <tr className="text-gray-500 border-b">
+            <th className="py-2 text-left">ID</th>
+            <th className="py-2 text-left">Check In</th>
+            <th className="py-2 text-left">Check Out</th>
           </tr>
         </thead>
+
         <tbody>
           {data.map((item) => (
-            <tr key={item.id} className="border-t">
-              <td>{item.id}</td>
+            <tr key={item.id} className="border-b hover:bg-gray-50">
+              <td className="py-3">{item.id}</td>
               <td>{item.check_in_time}</td>
-              <td>{item.check_out_time || "-"}</td>
+              <td className="text-gray-500">
+                {item.check_out_time || "Active"}
+              </td>
             </tr>
           ))}
         </tbody>
