@@ -1,8 +1,6 @@
-"use client";
-
 import type { Metadata } from "next";
 import "./globals.css";
-import { AuthProvider } from "@/context/AuthContext";
+import Providers from "./providers";
 
 export const metadata: Metadata = {
   title: "Gym Dashboard",
@@ -17,9 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
