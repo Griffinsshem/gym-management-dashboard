@@ -18,6 +18,12 @@ export default function Dashboard() {
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      window.location.href = "/login";
+      return;
+    }
 
     if (storedUser) {
       const user = JSON.parse(storedUser);
