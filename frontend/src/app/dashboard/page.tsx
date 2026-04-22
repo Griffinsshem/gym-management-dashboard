@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Users, Activity, ClipboardList } from "lucide-react";
+import { Users, Activity, ClipboardList, Loader2 } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
 import StatsCard from "@/components/StatsCard";
@@ -13,6 +13,10 @@ export default function Dashboard() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [memberId, setMemberId] = useState<number | null>(null);
+
+  // ✅ Button loading states
+  const [checkingIn, setCheckingIn] = useState(false);
+  const [checkingOut, setCheckingOut] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -48,21 +52,27 @@ export default function Dashboard() {
 
   const handleCheckIn = async () => {
     try {
+      setCheckingIn(true);
       await apiClient.post(`/attendance/check-in/${memberId}`);
-      toast.success("Checked in successfully");
+      toast.success("Checked in successfully ✅");
       fetchAttendance();
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Check-in failed");
+    } finally {
+      setCheckingIn(false);
     }
   };
 
   const handleCheckOut = async () => {
     try {
+      setCheckingOut(true);
       await apiClient.post(`/attendance/check-out/${memberId}`);
-      toast.success("Checked out successfully");
+      toast.success("Checked out successfully ✅");
       fetchAttendance();
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Check-out failed");
+    } finally {
+      setCheckingOut(false);
     }
   };
 
@@ -93,30 +103,32 @@ export default function Dashboard() {
           <div className="mt-6 flex gap-4">
             <button
               onClick={handleCheckIn}
-              disabled={hasActiveSession}
-              className={`px-5 py-2 rounded-lg shadow-sm text-white transition
-                ${hasActiveSession
+              disabled={hasActiveSession || checkingIn}
+              className={`flex items-center gap-2 px-5 py-2 rounded-lg shadow-sm text-white transition
+                ${hasActiveSession || checkingIn
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-green-600 hover:bg-green-700"
                 }`}
             >
-              Check In
+              {checkingIn && <Loader2 className="animate-spin w-4 h-4" />}
+              {checkingIn ? "Checking In..." : "Check In"}
             </button>
 
             <button
               onClick={handleCheckOut}
-              disabled={!hasActiveSession}
-              className={`px-5 py-2 rounded-lg shadow-sm text-white transition
-                ${!hasActiveSession
+              disabled={!hasActiveSession || checkingOut}
+              className={`flex items-center gap-2 px-5 py-2 rounded-lg shadow-sm text-white transition
+                ${!hasActiveSession || checkingOut
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-red-600 hover:bg-red-700"
                 }`}
             >
-              Check Out
+              {checkingOut && <Loader2 className="animate-spin w-4 h-4" />}
+              {checkingOut ? "Checking Out..." : "Check Out"}
             </button>
           </div>
 
-          {/* Table / Skeleton */}
+          {/* Table */}
           <div className="mt-6">
             {loading ? (
               <div className="animate-pulse space-y-4">
