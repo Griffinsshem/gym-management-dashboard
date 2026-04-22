@@ -41,8 +41,7 @@ export default function Dashboard() {
     } catch (err: any) {
       if (err.response?.status === 404) {
         setData([]);
-      } else {
-        console.error(err);
+      } else if (err.response?.status !== 401) {
         toast.error("Failed to fetch attendance");
       }
     } finally {
