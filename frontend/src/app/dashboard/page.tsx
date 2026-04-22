@@ -12,11 +12,24 @@ import toast from "react-hot-toast";
 export default function Dashboard() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [memberId, setMemberId] = useState<number | null>(null);
+
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      setMemberId(user.id);
+    }
+  }, []);
 
   const fetchAttendance = async () => {
+    if (!memberId) return;
+
     try {
       setLoading(true);
-      const res = await apiClient.get("/attendance/member/3");
+      const res = await apiClient.get(`/attendance/member/${memberId}`);
       setData(res.data.data);
     } catch (err) {
       console.error(err);
@@ -28,11 +41,11 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchAttendance();
-  }, []);
+  }, [memberId]);
 
   const handleCheckIn = async () => {
     try {
-      await apiClient.post("/attendance/check-in/3");
+      await apiClient.post(`/attendance/check-in/${memberId}`);
       toast.success("Checked in successfully");
       fetchAttendance();
     } catch (err: any) {
@@ -42,7 +55,7 @@ export default function Dashboard() {
 
   const handleCheckOut = async () => {
     try {
-      await apiClient.post("/attendance/check-out/3");
+      await apiClient.post(`/attendance/check-out/${memberId}`);
       toast.success("Checked out successfully");
       fetchAttendance();
     } catch (err: any) {
