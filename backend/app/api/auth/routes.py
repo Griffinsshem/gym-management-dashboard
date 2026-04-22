@@ -1,5 +1,6 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request
 from app.services.auth_service import AuthService
+from app.utils.response import success_response, error_response
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/api/v1/auth")
 auth_service = AuthService()
@@ -9,30 +10,36 @@ auth_service = AuthService()
 def register():
     data = request.get_json()
 
+    if not data:
+        return error_response("Invalid request body", "BAD_REQUEST", 400)
+
     try:
         user = auth_service.register_user(
             email=data.get("email"),
             password=data.get("password")
         )
 
-        return jsonify({
-            "success": True,
-            "data": {
+        return success_response(
+            data={
                 "id": user.id,
                 "email": user.email
-            }
-        }), 201
+            },
+            message="User registered successfully"
+        ), 201
 
     except ValueError as e:
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 400
+        return error_response(str(e), "REGISTER_ERROR", 400)
+
+    except Exception:
+        return error_response("Internal server error", "SERVER_ERROR", 500)
 
 
 @auth_bp.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
+
+    if not data:
+        return error_response("Invalid request body", "BAD_REQUEST", 400)
 
     try:
         result = auth_service.login_user(
@@ -40,17 +47,17 @@ def login():
             password=data.get("password")
         )
 
-        return jsonify({
-            "success": True,
-            "data": {
+        return success_response(
+            data={
                 "id": result["user"].id,
                 "email": result["user"].email,
                 "access_token": result["access_token"]
-            }
-        })
+            },
+            message="Login successful"
+        )
 
     except ValueError as e:
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 401
+        return error_response(str(e), "AUTH_ERROR", 401)
+
+    except Exception:
+        return error_response("Internal server error", "SERVER_ERROR", 500)
