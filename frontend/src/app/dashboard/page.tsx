@@ -26,15 +26,19 @@ export default function Dashboard() {
   }, []);
 
   const fetchAttendance = async () => {
-    if (!memberId || memberId === null) return;
+    if (!memberId) return;
 
     try {
       setLoading(true);
       const res = await apiClient.get(`/attendance/member/${memberId}`);
       setData(res.data.data);
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to fetch attendance");
+    } catch (err: any) {
+      if (err.response?.status === 404) {
+        setData([]);
+      } else {
+        console.error(err);
+        toast.error("Failed to fetch attendance");
+      }
     } finally {
       setLoading(false);
     }
