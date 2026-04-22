@@ -1,10 +1,9 @@
 import axios from "axios";
 
-export const apiClient = axios.create({
+const apiClient = axios.create({
   baseURL: "http://localhost:5000/api/v1",
 });
 
-// Attach token automatically
 apiClient.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
     const token = localStorage.getItem("token");
@@ -16,3 +15,21 @@ apiClient.interceptors.request.use((config) => {
 
   return config;
 });
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (typeof window !== "undefined") {
+      if (error.response?.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+        window.location.href = "/login";
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+export { apiClient };
