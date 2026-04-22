@@ -33,8 +33,8 @@ export default function Dashboard() {
   const handleCheckIn = async () => {
     try {
       await API.post("/attendance/check-in/3");
-      toast.success("Checked in successfully ✅");
-      fetchAttendance(); // ✅ real-time update
+      toast.success("Checked in successfully");
+      fetchAttendance();
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Check-in failed");
     }
@@ -43,8 +43,8 @@ export default function Dashboard() {
   const handleCheckOut = async () => {
     try {
       await API.post("/attendance/check-out/3");
-      toast.success("Checked out successfully ✅");
-      fetchAttendance(); // ✅ real-time update
+      toast.success("Checked out successfully");
+      fetchAttendance();
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Check-out failed");
     }
@@ -86,10 +86,15 @@ export default function Dashboard() {
             </button>
           </div>
 
-          {/* Table */}
+          {/* Table / Skeleton */}
           <div className="mt-6">
             {loading ? (
-              <p className="text-gray-500">Loading attendance...</p>
+              <div className="animate-pulse space-y-4">
+                <div className="h-6 bg-gray-200 rounded w-1/4"></div>
+                <div className="h-10 bg-gray-200 rounded"></div>
+                <div className="h-10 bg-gray-200 rounded"></div>
+                <div className="h-10 bg-gray-200 rounded"></div>
+              </div>
             ) : (
               <AttendanceTable data={data} />
             )}
