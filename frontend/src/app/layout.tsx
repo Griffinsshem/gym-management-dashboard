@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Providers from "./providers";
+import { AuthProvider } from "@/context/AuthContext";
+import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
   title: "Gym Dashboard",
@@ -15,7 +16,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Providers>{children}</Providers>
+        <AuthProvider>
+          {children}
+
+          <Toaster position="top-right" />
+        </AuthProvider>
       </body>
     </html>
   );
