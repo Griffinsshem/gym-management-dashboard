@@ -1,31 +1,32 @@
 "use client";
 
-import { LayoutDashboard, Users, LogOut } from "lucide-react";
-import Link from "next/link";
+import { LayoutDashboard, LogOut } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Sidebar() {
   const { logout } = useAuth();
 
   return (
-    <div className="h-screen w-64 bg-gray-900 text-white flex flex-col p-5 shadow-lg">
-      <h1 className="text-2xl font-bold mb-10">GymPro</h1>
+    <div className="w-64 h-screen bg-white border-r flex flex-col justify-between p-4">
+      {/* Logo */}
+      <div>
+        <h1 className="text-2xl font-semibold text-gray-800 mb-8">
+          Gym<span className="text-blue-600">Pro</span>
+        </h1>
 
-      <nav className="flex flex-col gap-2">
-        <Link href="/dashboard" className="flex items-center gap-3 p-2 rounded-lg bg-gray-800">
-          <LayoutDashboard size={18} />
-          Dashboard
-        </Link>
+        {/* Nav */}
+        <nav className="space-y-2">
+          <div className="flex items-center gap-3 p-2 rounded-lg bg-blue-50 text-blue-600">
+            <LayoutDashboard size={18} />
+            <span className="font-medium">Dashboard</span>
+          </div>
+        </nav>
+      </div>
 
-        <Link href="#" className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-800">
-          <Users size={18} />
-          Members
-        </Link>
-      </nav>
-
+      {/* Logout */}
       <button
         onClick={logout}
-        className="mt-auto flex items-center gap-2 text-red-400 hover:text-red-300"
+        className="flex items-center gap-2 text-gray-600 hover:text-red-500 transition"
       >
         <LogOut size={18} />
         Logout
