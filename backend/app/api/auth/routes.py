@@ -51,7 +51,8 @@ def login():
             data={
                 "id": result["user"].id,
                 "email": result["user"].email,
-                "access_token": result["access_token"]
+                "access_token": result["access_token"],
+                "member_id": result["member_id"]
             },
             message="Login successful"
         )
