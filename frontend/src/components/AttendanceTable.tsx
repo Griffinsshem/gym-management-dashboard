@@ -19,9 +19,9 @@ export default function AttendanceTable({ data }: Props) {
         <tbody>
           {data.map((item) => (
             <tr key={item.id} className="border-b hover:bg-gray-50">
-              <td className="py-3">{item.id}</td>
-              <td>{item.check_in_time}</td>
-              <td className="text-gray-500">
+              <td className="py-3 text-gray-900">{item.id}</td>
+              <td className="text-gray-900">{item.check_in_time}</td>
+              <td className="text-gray-900">
                 {item.check_out_time || "Active"}
               </td>
             </tr>
