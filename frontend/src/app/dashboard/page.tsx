@@ -14,7 +14,6 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [memberId, setMemberId] = useState<number | null>(null);
 
-
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
 
@@ -42,6 +41,10 @@ export default function Dashboard() {
   useEffect(() => {
     fetchAttendance();
   }, [memberId]);
+
+  const hasActiveSession = data.some(
+    (r) => r.check_out_time === null
+  );
 
   const handleCheckIn = async () => {
     try {
@@ -78,7 +81,11 @@ export default function Dashboard() {
               value={data.length.toString()}
               icon={<ClipboardList />}
             />
-            <StatsCard title="Active Sessions" value="1" icon={<Activity />} />
+            <StatsCard
+              title="Active Sessions"
+              value={hasActiveSession ? "1" : "0"}
+              icon={<Activity />}
+            />
             <StatsCard title="Members" value="10" icon={<Users />} />
           </div>
 
@@ -86,14 +93,24 @@ export default function Dashboard() {
           <div className="mt-6 flex gap-4">
             <button
               onClick={handleCheckIn}
-              className="bg-green-600 hover:bg-green-700 transition text-white px-5 py-2 rounded-lg shadow-sm"
+              disabled={hasActiveSession}
+              className={`px-5 py-2 rounded-lg shadow-sm text-white transition
+                ${hasActiveSession
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-green-600 hover:bg-green-700"
+                }`}
             >
               Check In
             </button>
 
             <button
               onClick={handleCheckOut}
-              className="bg-red-600 hover:bg-red-700 transition text-white px-5 py-2 rounded-lg shadow-sm"
+              disabled={!hasActiveSession}
+              className={`px-5 py-2 rounded-lg shadow-sm text-white transition
+                ${!hasActiveSession
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-red-600 hover:bg-red-700"
+                }`}
             >
               Check Out
             </button>
