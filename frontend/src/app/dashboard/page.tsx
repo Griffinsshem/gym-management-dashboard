@@ -6,7 +6,7 @@ import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
 import StatsCard from "@/components/StatsCard";
 import AttendanceTable from "@/components/AttendanceTable";
-import API from "@/lib/api";
+import { apiClient } from "@/lib/api";
 import toast from "react-hot-toast";
 
 export default function Dashboard() {
@@ -16,7 +16,7 @@ export default function Dashboard() {
   const fetchAttendance = async () => {
     try {
       setLoading(true);
-      const res = await API.get("/attendance/member/3");
+      const res = await apiClient.get("/attendance/member/3");
       setData(res.data.data);
     } catch (err) {
       console.error(err);
@@ -32,7 +32,7 @@ export default function Dashboard() {
 
   const handleCheckIn = async () => {
     try {
-      await API.post("/attendance/check-in/3");
+      await apiClient.post("/attendance/check-in/3");
       toast.success("Checked in successfully");
       fetchAttendance();
     } catch (err: any) {
@@ -42,7 +42,7 @@ export default function Dashboard() {
 
   const handleCheckOut = async () => {
     try {
-      await API.post("/attendance/check-out/3");
+      await apiClient.post("/attendance/check-out/3");
       toast.success("Checked out successfully");
       fetchAttendance();
     } catch (err: any) {
