@@ -7,38 +7,46 @@ import Navbar from "@/components/Navbar";
 import StatsCard from "@/components/StatsCard";
 import AttendanceTable from "@/components/AttendanceTable";
 import API from "@/lib/api";
+import toast from "react-hot-toast";
 
 export default function Dashboard() {
   const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchAttendance = async () => {
+    try {
+      setLoading(true);
+      const res = await API.get("/attendance/member/3");
+      setData(res.data.data);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to fetch attendance");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchAttendance = async () => {
-      try {
-        const res = await API.get("/attendance/member/3");
-        setData(res.data.data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
     fetchAttendance();
   }, []);
 
   const handleCheckIn = async () => {
     try {
       await API.post("/attendance/check-in/3");
-      location.reload();
-    } catch (err) {
-      console.error(err);
+      toast.success("Checked in successfully ✅");
+      fetchAttendance(); // ✅ real-time update
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || "Check-in failed");
     }
   };
 
   const handleCheckOut = async () => {
     try {
       await API.post("/attendance/check-out/3");
-      location.reload();
-    } catch (err) {
-      console.error(err);
+      toast.success("Checked out successfully ✅");
+      fetchAttendance(); // ✅ real-time update
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || "Check-out failed");
     }
   };
 
@@ -79,7 +87,13 @@ export default function Dashboard() {
           </div>
 
           {/* Table */}
-          <AttendanceTable data={data} />
+          <div className="mt-6">
+            {loading ? (
+              <p className="text-gray-500">Loading attendance...</p>
+            ) : (
+              <AttendanceTable data={data} />
+            )}
+          </div>
         </div>
       </div>
     </div>
