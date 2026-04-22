@@ -13,8 +13,6 @@ export default function Dashboard() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [memberId, setMemberId] = useState<number | null>(null);
-
-  // ✅ Button loading states
   const [checkingIn, setCheckingIn] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
 
@@ -28,7 +26,7 @@ export default function Dashboard() {
   }, []);
 
   const fetchAttendance = async () => {
-    if (!memberId) return;
+    if (!memberId || memberId === null) return;
 
     try {
       setLoading(true);
@@ -51,10 +49,15 @@ export default function Dashboard() {
   );
 
   const handleCheckIn = async () => {
+    if (!memberId) {
+      toast.error("User not loaded");
+      return;
+    }
+
     try {
       setCheckingIn(true);
       await apiClient.post(`/attendance/check-in/${memberId}`);
-      toast.success("Checked in successfully ✅");
+      toast.success("Checked in successfully");
       fetchAttendance();
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Check-in failed");
@@ -63,11 +66,12 @@ export default function Dashboard() {
     }
   };
 
+
   const handleCheckOut = async () => {
     try {
       setCheckingOut(true);
       await apiClient.post(`/attendance/check-out/${memberId}`);
-      toast.success("Checked out successfully ✅");
+      toast.success("Checked out successfully");
       fetchAttendance();
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Check-out failed");
