@@ -1,51 +1,45 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { Users, Activity, ClipboardList } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
 import StatsCard from "@/components/StatsCard";
 import AttendanceTable from "@/components/AttendanceTable";
+import API from "@/lib/api";
 
 export default function Dashboard() {
-  const [data, setData] = useState([]);
-
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const [data, setData] = useState<any[]>([]);
 
   useEffect(() => {
-    if (!token) return;
+    const fetchAttendance = async () => {
+      try {
+        const res = await API.get("/attendance/member/3");
+        setData(res.data.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-    axios
-      .get("http://localhost:5000/api/v1/attendance/member/3", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => setData(res.data.data))
-      .catch((err) => console.error(err));
-  }, [token]);
+    fetchAttendance();
+  }, []);
 
   const handleCheckIn = async () => {
-    await axios.post(
-      "http://localhost:5000/api/v1/attendance/check-in/3",
-      {},
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-    location.reload();
+    try {
+      await API.post("/attendance/check-in/3");
+      location.reload();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleCheckOut = async () => {
-    await axios.post(
-      "http://localhost:5000/api/v1/attendance/check-out/3",
-      {},
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-    location.reload();
+    try {
+      await API.post("/attendance/check-out/3");
+      location.reload();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -58,7 +52,11 @@ export default function Dashboard() {
         <div className="p-6 max-w-7xl mx-auto">
           {/* Stats */}
           <div className="grid grid-cols-3 gap-4">
-            <StatsCard title="Total Records" value={data.length.toString()} icon={<ClipboardList />} />
+            <StatsCard
+              title="Total Records"
+              value={data.length.toString()}
+              icon={<ClipboardList />}
+            />
             <StatsCard title="Active Sessions" value="1" icon={<Activity />} />
             <StatsCard title="Members" value="10" icon={<Users />} />
           </div>
