@@ -10,10 +10,23 @@ export default function LoginPage() {
 
   const handleLogin = async () => {
     try {
-      await loginUser(form.email, form.password);
+      const res = await loginUser(form.email, form.password);
+
+      const { access_token, id, email: userEmail } = res.data;
+
+      localStorage.setItem("token", access_token);
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          id,
+          email: userEmail,
+        })
+      );
+
       router.push("/dashboard");
     } catch (err: any) {
-      alert(err.message);
+      console.error(err);
     }
   };
 
