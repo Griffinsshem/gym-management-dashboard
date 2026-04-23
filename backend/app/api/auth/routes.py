@@ -60,5 +60,9 @@ def login():
     except ValueError as e:
         return error_response(str(e), "AUTH_ERROR", 401)
 
-    except Exception:
-        return error_response("Internal server error", "SERVER_ERROR", 500)
+    
+    except Exception as e:
+        print("LOGIN ERROR:", str(e))  
+        import traceback
+        traceback.print_exc()      
+        return error_response(str(e), "SERVER_ERROR", 500)
