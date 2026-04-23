@@ -14,6 +14,9 @@ class MemberRepository(BaseRepository):
     def get_by_phone(self, phone):
         return self.model.query.filter_by(phone=phone).first()
 
+    def get_by_user_id(self, user_id):
+        return self.model.query.filter_by(user_id=user_id, is_active=True).first()
+
     def deactivate(self, member):
         member.is_active = False
         return self.update(member, {})
