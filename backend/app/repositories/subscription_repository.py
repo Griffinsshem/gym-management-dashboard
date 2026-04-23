@@ -18,5 +18,6 @@ class SubscriptionRepository:
     def get_by_member(self, member_id):
         return MembershipSubscription.query.filter_by(member_id=member_id).all()
 
-    def update(self):
+    def update(self, subscription):
         db.session.commit()
+        return subscription
