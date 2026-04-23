@@ -45,8 +45,8 @@ class AttendanceService:
         return [
             {
                 "id": r.id,
-                "check_in_time": r.check_in_time,
-                "check_out_time": r.check_out_time
+                "check_in_time": r.check_in_time.isoformat() if r.check_in_time else None,
+                "check_out_time": r.check_out_time.isoformat() if r.check_out_time else None
             }
             for r in records
         ]
