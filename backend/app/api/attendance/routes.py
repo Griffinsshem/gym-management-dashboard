@@ -8,16 +8,18 @@ attendance_bp = Blueprint("attendance", __name__, url_prefix="/api/v1/attendance
 attendance_service = AttendanceService()
 
 
-@attendance_bp.route("/checkin", methods=["POST"])
+@attendance_bp.route("/check-in", methods=["POST"])
 @jwt_required
 def check_in():
     data = request.get_json()
 
     if not data or not data.get("member_id"):
-        return error_response("member_id is required", "VALIDATION_ERROR", 422)
+        return error_response("member_id is required", "BAD_REQUEST", 400)
 
     try:
-        attendance = attendance_service.check_in(member_id=data.get("member_id"))
+        attendance = attendance_service.check_in(
+            member_id=data.get("member_id")
+        )
 
         return success_response(
             data={
@@ -32,16 +34,18 @@ def check_in():
         return error_response(str(e), "CHECKIN_ERROR", 400)
 
 
-@attendance_bp.route("/checkout", methods=["POST"])
+@attendance_bp.route("/check-out", methods=["POST"])
 @jwt_required
 def check_out():
     data = request.get_json()
 
     if not data or not data.get("member_id"):
-        return error_response("member_id is required", "VALIDATION_ERROR", 422)
+        return error_response("member_id is required", "BAD_REQUEST", 400)
 
     try:
-        attendance = attendance_service.check_out(member_id=data.get("member_id"))
+        attendance = attendance_service.check_out(
+            member_id=data.get("member_id")
+        )
 
         return success_response(
             data={
@@ -64,7 +68,7 @@ def get_member_attendance(member_id):
 
         return success_response(
             data=records,
-            message="Attendance fetched"
+            message="Attendance fetched successfully"
         )
 
     except ValueError as e:
