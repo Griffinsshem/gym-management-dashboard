@@ -8,7 +8,7 @@ def generate_access_token(user):
     payload = {
         "user_id": user.id,
         "email": user.email,
-        "role": user.role.value,
+        "role": user.role,
         "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=15)
     }
 
