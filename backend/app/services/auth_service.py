@@ -1,6 +1,6 @@
 from app.repositories.user_repository import UserRepository
 from app.repositories.member_repository import MemberRepository
-from app.extensions import bcrypt
+from app.extensions import bcrypt, db
 from app.utils.token import generate_access_token
 
 
@@ -10,29 +10,42 @@ class AuthService:
         self.member_repo = MemberRepository()
 
     def register_user(self, email, password, role="member"):
+        if not email or not password:
+            raise ValueError("Email and password are required")
+
         existing_user = self.user_repo.get_by_email(email)
         if existing_user:
             raise ValueError("User already exists")
 
-        # Hash password
-        password_hash = bcrypt.generate_password_hash(password).decode("utf-8")
+        try:
+            # Hash password
+            password_hash = bcrypt.generate_password_hash(password).decode("utf-8")
 
-        # Create user
-        user = self.user_repo.create({
-            "email": email,
-            "password_hash": password_hash,
-            "role": role
-        })
+            # Create user
+            user = self.user_repo.create({
+                "email": email,
+                "password_hash": password_hash,
+                "role": role
+            })
 
-        member = self.member_repo.create({
-            "full_name": email.split("@")[0],
-            "email": email,
-            "phone": f"07{user.id:08d}"
-        })
+            # Create member (no user_id linkage for now)
+            self.member_repo.create({
+                "full_name": email.split("@")[0],
+                "email": email,
+                "phone": f"07{user.id:08d}"
+            })
 
-        return user
+            db.session.commit()
+            return user
+
+        except Exception as e:
+            db.session.rollback()
+            raise e
 
     def login_user(self, email, password):
+        if not email or not password:
+            raise ValueError("Email and password are required")
+
         user = self.user_repo.get_by_email(email)
 
         if not user:
@@ -41,6 +54,7 @@ class AuthService:
         if not bcrypt.check_password_hash(user.password_hash, password):
             raise ValueError("Invalid credentials")
 
+        # Use repository instead of raw query
         member = self.member_repo.model.query.filter_by(
             email=email,
             is_active=True
