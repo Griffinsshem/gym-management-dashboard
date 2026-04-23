@@ -49,6 +49,6 @@ class SubscriptionService:
         subscription = self.get_subscription(subscription_id)
 
         subscription.status = SubscriptionStatus.cancelled
-        self.subscription_repo.update()
+        self.subscription_repo.update(subscription)
 
         return subscription
