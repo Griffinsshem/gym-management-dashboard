@@ -14,12 +14,20 @@ class AuthService:
         if existing_user:
             raise ValueError("User already exists")
 
+        # Hash password
         password_hash = bcrypt.generate_password_hash(password).decode("utf-8")
 
+        # Create user
         user = self.user_repo.create({
             "email": email,
             "password_hash": password_hash,
             "role": role
+        })
+
+        member = self.member_repo.create({
+            "full_name": email.split("@")[0],
+            "email": email,
+            "phone": f"07{user.id:08d}"
         })
 
         return user
@@ -33,7 +41,10 @@ class AuthService:
         if not bcrypt.check_password_hash(user.password_hash, password):
             raise ValueError("Invalid credentials")
 
-        member = self.member_repo.get_by_user_id(user.id)
+        member = self.member_repo.model.query.filter_by(
+            email=email,
+            is_active=True
+        ).first()
 
         access_token = generate_access_token(user)
 
