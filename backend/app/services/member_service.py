@@ -5,8 +5,11 @@ class MemberService:
     def __init__(self):
         self.member_repo = MemberRepository()
 
-    def create_member(self, full_name, phone, email=None, gender=None, date_of_birth=None):
+    def create_member(self, user_id, full_name, phone, email=None, gender=None, date_of_birth=None):
         # validation
+        if not user_id:
+            raise ValueError("User ID is required")
+
         if not full_name or not phone:
             raise ValueError("Full name and phone are required")
 
@@ -16,6 +19,7 @@ class MemberService:
             raise ValueError("Member with this phone already exists")
 
         member = self.member_repo.create({
+            "user_id": user_id,
             "full_name": full_name,
             "phone": phone,
             "email": email,
