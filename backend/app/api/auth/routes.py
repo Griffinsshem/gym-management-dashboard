@@ -62,7 +62,7 @@ def login():
 
     
     except Exception as e:
-        print("LOGIN ERROR:", str(e))  
+        print("REGISTER ERROR:", str(e))  
         import traceback
         traceback.print_exc()      
         return error_response(str(e), "SERVER_ERROR", 500)
