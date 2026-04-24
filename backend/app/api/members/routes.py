@@ -13,7 +13,10 @@ def create_member():
     data = request.get_json()
 
     try:
+        current_user = request.user 
+
         member = member_service.create_member(
+            user_id=current_user["user_id"], 
             full_name=data.get("full_name"),
             phone=data.get("phone"),
             email=data.get("email"),
