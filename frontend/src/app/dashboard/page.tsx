@@ -79,6 +79,11 @@ export default function Dashboard() {
 
 
   const handleCheckOut = async () => {
+    if (!memberId) {
+      toast.error("User not loaded");
+      return;
+    }
+
     try {
       setCheckingOut(true);
       await apiClient.post(`/attendance/check-out`, {
