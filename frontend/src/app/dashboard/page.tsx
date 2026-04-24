@@ -65,7 +65,9 @@ export default function Dashboard() {
 
     try {
       setCheckingIn(true);
-      await apiClient.post(`/attendance/check-in/${memberId}`);
+      await apiClient.post(`/attendance/check-in`, {
+        member_id: memberId,
+      });
       toast.success("Checked in successfully");
       fetchAttendance();
     } catch (err: any) {
@@ -79,7 +81,9 @@ export default function Dashboard() {
   const handleCheckOut = async () => {
     try {
       setCheckingOut(true);
-      await apiClient.post(`/attendance/check-out/${memberId}`);
+      await apiClient.post(`/attendance/check-out`, {
+        member_id: memberId,
+      });
       toast.success("Checked out successfully");
       fetchAttendance();
     } catch (err: any) {
