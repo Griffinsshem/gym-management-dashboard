@@ -5,7 +5,6 @@ from app.utils.response import success_response, error_response
 auth_bp = Blueprint("auth", __name__, url_prefix="/api/v1/auth")
 auth_service = AuthService()
 
-
 @auth_bp.route("/register", methods=["POST"])
 def register():
     data = request.get_json()
@@ -19,20 +18,20 @@ def register():
             password=data.get("password")
         )
 
+
         return success_response(
             data={
                 "id": user.id,
                 "email": user.email
             },
             message="User registered successfully"
-        ), 201
+        )
 
     except ValueError as e:
         return error_response(str(e), "REGISTER_ERROR", 400)
 
     except Exception:
         return error_response("Internal server error", "SERVER_ERROR", 500)
-
 
 @auth_bp.route("/login", methods=["POST"])
 def login():
