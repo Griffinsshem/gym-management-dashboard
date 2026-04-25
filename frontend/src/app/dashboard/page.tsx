@@ -16,6 +16,7 @@ export default function Dashboard() {
   const [checkingIn, setCheckingIn] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
 
+  // ✅ Auth + set memberId
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
@@ -27,7 +28,8 @@ export default function Dashboard() {
 
     if (storedUser) {
       const user = JSON.parse(storedUser);
-      setMemberId(user.id);
+      const resolvedMemberId = user.member_id || user.id;
+      setMemberId(resolvedMemberId);
     }
   }, []);
 
@@ -76,7 +78,6 @@ export default function Dashboard() {
       setCheckingIn(false);
     }
   };
-
 
   const handleCheckOut = async () => {
     if (!memberId) {
