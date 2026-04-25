@@ -12,7 +12,18 @@ export default function LoginPage() {
     try {
       const res = await loginUser(form.email, form.password);
 
-      const { access_token, id, email: userEmail } = res.data;
+      const { access_token, id, email: userEmail, member_id } = res;
+
+      localStorage.setItem("token", access_token);
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          id,
+          email: userEmail,
+          member_id,
+        })
+      );
 
       localStorage.setItem("token", access_token);
 
