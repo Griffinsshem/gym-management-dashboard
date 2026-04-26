@@ -44,12 +44,12 @@ export default function AssignPlanModal({
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
       <div className="bg-white rounded-lg w-[400px] p-6">
-        <h2 className="text-lg font-semibold mb-4">
+        <h2 className="text-lg font-semibold mb-4 text-gray-800">
           Assign Plan to {member.full_name}
         </h2>
 
         <select
-          className="w-full border p-2 rounded mb-4"
+          className="w-full border p-2 rounded mb-4 text-gray-700"
           value={selectedPlan ?? ""}
           onChange={(e) => setSelectedPlan(Number(e.target.value))}
         >
@@ -64,7 +64,7 @@ export default function AssignPlanModal({
         <div className="flex justify-end gap-2">
           <button
             onClick={onClose}
-            className="px-4 py-2 border rounded"
+            className="px-4 py-2 border rounded text-gray-700 hover:bg-gray-100"
           >
             Cancel
           </button>
