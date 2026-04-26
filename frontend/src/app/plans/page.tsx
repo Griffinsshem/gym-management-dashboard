@@ -1,0 +1,56 @@
+"use client";
+
+import { useState } from "react";
+import Sidebar from "@/components/Sidebar";
+import Navbar from "@/components/Navbar";
+import PlanCard from "@/components/PlanCard";
+import CreatePlanModal from "@/components/CreatePlanModal";
+
+export default function PlansPage() {
+  const [plans, setPlans] = useState<any[]>([]);
+  const [open, setOpen] = useState(false);
+
+  const handleAddPlan = (plan: any) => {
+    setPlans((prev) => [...prev, plan]);
+  };
+
+  return (
+    <div className="flex">
+      <Sidebar />
+
+      <div className="flex-1 bg-gray-50 min-h-screen">
+        <Navbar />
+
+        <div className="p-6 max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold">Membership Plans</h1>
+            <button
+              onClick={() => setOpen(true)}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+            >
+              + Create Plan
+            </button>
+          </div>
+
+          {/* Plans Grid */}
+          {plans.length === 0 ? (
+            <p className="text-gray-500">No plans created yet.</p>
+          ) : (
+            <div className="grid grid-cols-3 gap-4">
+              {plans.map((plan, index) => (
+                <PlanCard key={index} plan={plan} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <CreatePlanModal
+        open={open}
+        onClose={() => setOpen(false)}
+        onCreate={handleAddPlan}
+      />
+    </div>
+  );
+}
