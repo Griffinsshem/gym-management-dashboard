@@ -16,7 +16,7 @@ export default function Dashboard() {
   const [checkingIn, setCheckingIn] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
 
-  // ✅ Auth + set memberId
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
@@ -28,8 +28,11 @@ export default function Dashboard() {
 
     if (storedUser) {
       const user = JSON.parse(storedUser);
-      const resolvedMemberId = user.member_id || user.id;
-      setMemberId(resolvedMemberId);
+      if (!user.member_id) {
+        toast.error("No member profile found. Contact admin");
+        return;
+      }
+      setMemberId(user.member_id)
     }
   }, []);
 
