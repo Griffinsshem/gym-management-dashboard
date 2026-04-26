@@ -12,11 +12,13 @@ import {
   updateMember,
   Member,
 } from "@/lib/mock/member";
+import AssignPlanModal from "@/components/subscriptions/AssignPlanModal";
 
 export default function MembersPage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<Member | null>(null);
+  const [assigning, setAssigning] = useState<Member | null>(null);
 
   const loadMembers = async () => {
     const data = await getMembers();
@@ -48,9 +50,7 @@ export default function MembersPage() {
           <MembersTable
             data={members}
             onEdit={(m) => setEditing(m)}
-            onAssign={(m) => {
-              console.log("Assign plan clicked:", m);
-            }}
+            onAssign={(m) => setAssigning(m)}
           />
         </div>
       </div>
@@ -74,6 +74,17 @@ export default function MembersPage() {
             await updateMember(editing.id, data);
             setEditing(null);
             loadMembers();
+          }}
+        />
+      )}
+
+      {assigning && (
+        <AssignPlanModal
+          member={assigning}
+          onClose={() => setAssigning(null)}
+          onAssign={async (planId) => {
+            console.log("Assign plan:", assigning.id, planId);
+            setAssigning(null);
           }}
         />
       )}
