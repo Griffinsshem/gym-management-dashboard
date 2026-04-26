@@ -35,7 +35,10 @@ export default function PlansPage() {
 
           {/* Plans Grid */}
           {plans.length === 0 ? (
-            <p className="text-gray-500">No plans created yet.</p>
+            <div className="text-center text-gray-500 py-10">
+              <p className="text-lg font-medium">No plans yet</p>
+              <p className="text-sm">Create your first membership plan</p>
+            </div>
           ) : (
             <div className="grid grid-cols-3 gap-4">
               {plans.map((plan, index) => (
