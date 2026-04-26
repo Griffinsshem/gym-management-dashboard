@@ -48,6 +48,9 @@ export default function MembersPage() {
           <MembersTable
             data={members}
             onEdit={(m) => setEditing(m)}
+            onAssign={(m) => {
+              console.log("Assign plan clicked:", m);
+            }}
           />
         </div>
       </div>
