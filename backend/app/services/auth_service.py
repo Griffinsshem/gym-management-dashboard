@@ -18,18 +18,19 @@ class AuthService:
             raise ValueError("User already exists")
 
         try:
-            # Hash password
+            
             password_hash = bcrypt.generate_password_hash(password).decode("utf-8")
 
-            # Create user
+            
             user = self.user_repo.create({
                 "email": email,
                 "password_hash": password_hash,
                 "role": role
             })
 
-            # Create member (no user_id linkage for now)
+            
             self.member_repo.create({
+                "user_id": user.id,   
                 "full_name": email.split("@")[0],
                 "email": email,
                 "phone": f"07{user.id:08d}"
@@ -54,9 +55,8 @@ class AuthService:
         if not bcrypt.check_password_hash(user.password_hash, password):
             raise ValueError("Invalid credentials")
 
-        # Use repository instead of raw query
         member = self.member_repo.model.query.filter_by(
-            email=email,
+            user_id=user.id,
             is_active=True
         ).first()
 
