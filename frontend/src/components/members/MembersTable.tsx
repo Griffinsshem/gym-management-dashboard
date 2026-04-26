@@ -3,9 +3,11 @@ import { Member } from "@/lib/mock/member";
 export default function MembersTable({
   data,
   onEdit,
+  onAssign,
 }: {
   data: Member[];
   onEdit: (member: Member) => void;
+  onAssign: (member: Member) => void;
 }) {
   return (
     <table className="w-full bg-white shadow rounded-lg">
@@ -23,12 +25,21 @@ export default function MembersTable({
             <td className="p-3">{member.full_name}</td>
             <td className="p-3">{member.phone}</td>
             <td className="p-3">{member.email}</td>
-            <td className="p-3">
+            <td className="p-3 flex gap-4">
+
               <button
                 onClick={() => onEdit(member)}
                 className="text-blue-600"
               >
                 Edit
+              </button>
+
+
+              <button
+                onClick={() => onAssign(member)}
+                className="text-green-600"
+              >
+                Assign Plan
               </button>
             </td>
           </tr>
