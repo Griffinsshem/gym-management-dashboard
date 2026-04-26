@@ -1,10 +1,36 @@
 "use client";
 
-import { LayoutDashboard, LogOut } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  LayoutDashboard,
+  Users,
+  ClipboardList,
+  LogOut,
+} from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Sidebar() {
   const { logout } = useAuth();
+  const pathname = usePathname();
+
+  const navItems = [
+    {
+      name: "Dashboard",
+      href: "/dashboard",
+      icon: LayoutDashboard,
+    },
+    {
+      name: "Members",
+      href: "/members",
+      icon: Users,
+    },
+    {
+      name: "Plans",
+      href: "/plans",
+      icon: ClipboardList,
+    },
+  ];
 
   return (
     <div className="w-64 h-screen bg-white border-r flex flex-col justify-between p-4">
@@ -16,10 +42,24 @@ export default function Sidebar() {
 
         {/* Nav */}
         <nav className="space-y-2">
-          <div className="flex items-center gap-3 p-2 rounded-lg bg-blue-50 text-blue-600">
-            <LayoutDashboard size={18} />
-            <span className="font-medium">Dashboard</span>
-          </div>
+          {navItems.map((item) => {
+            const isActive = pathname === item.href;
+
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`flex items-center gap-3 p-2 rounded-lg transition
+                  ${isActive
+                    ? "bg-blue-50 text-blue-600"
+                    : "text-gray-600 hover:bg-gray-100"
+                  }`}
+              >
+                <item.icon size={18} />
+                <span className="font-medium">{item.name}</span>
+              </Link>
+            );
+          })}
         </nav>
       </div>
 
