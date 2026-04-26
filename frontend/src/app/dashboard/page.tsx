@@ -16,7 +16,7 @@ export default function Dashboard() {
   const [checkingIn, setCheckingIn] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
 
-
+  // Load user ONCE
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
@@ -28,25 +28,25 @@ export default function Dashboard() {
 
     if (storedUser) {
       const user = JSON.parse(storedUser);
-      if (!user.member_id) {
-        toast.error("No member profile found. Contact admin");
-        return;
-      }
-      setMemberId(user.member_id)
+
+      const resolvedMemberId = user.member_id ?? user.id;
+
+      console.log("Resolved memberId:", resolvedMemberId);
+
+      setMemberId(resolvedMemberId);
     }
   }, []);
 
-  const fetchAttendance = async () => {
-    if (!memberId) return;
-
+  // Fetch attendance (OUTSIDE useEffect)
+  const fetchAttendance = async (id: number) => {
     try {
       setLoading(true);
-      const res = await apiClient.get(`/attendance/member/${memberId}`);
+      const res = await apiClient.get(`/attendance/member/${id}`);
       setData(res.data.data);
     } catch (err: any) {
       if (err.response?.status === 404) {
         setData([]);
-      } else if (err.response?.status !== 401) {
+      } else {
         toast.error("Failed to fetch attendance");
       }
     } finally {
@@ -54,8 +54,11 @@ export default function Dashboard() {
     }
   };
 
+  // Trigger when memberId is ready
   useEffect(() => {
-    fetchAttendance();
+    if (memberId) {
+      fetchAttendance(memberId);
+    }
   }, [memberId]);
 
   const hasActiveSession = data.some(
@@ -70,11 +73,13 @@ export default function Dashboard() {
 
     try {
       setCheckingIn(true);
+
       await apiClient.post(`/attendance/check-in`, {
         member_id: memberId,
       });
+
       toast.success("Checked in successfully");
-      fetchAttendance();
+      fetchAttendance(memberId);
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Check-in failed");
     } finally {
@@ -90,11 +95,13 @@ export default function Dashboard() {
 
     try {
       setCheckingOut(true);
+
       await apiClient.post(`/attendance/check-out`, {
         member_id: memberId,
       });
+
       toast.success("Checked out successfully");
-      fetchAttendance();
+      fetchAttendance(memberId);
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Check-out failed");
     } finally {
@@ -129,9 +136,9 @@ export default function Dashboard() {
           <div className="mt-6 flex gap-4">
             <button
               onClick={handleCheckIn}
-              disabled={hasActiveSession || checkingIn}
+              disabled={!memberId || hasActiveSession || checkingIn}
               className={`flex items-center gap-2 px-5 py-2 rounded-lg shadow-sm text-white transition
-                ${hasActiveSession || checkingIn
+                ${!memberId || hasActiveSession || checkingIn
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-green-600 hover:bg-green-700"
                 }`}
@@ -142,9 +149,9 @@ export default function Dashboard() {
 
             <button
               onClick={handleCheckOut}
-              disabled={!hasActiveSession || checkingOut}
+              disabled={!memberId || !hasActiveSession || checkingOut}
               className={`flex items-center gap-2 px-5 py-2 rounded-lg shadow-sm text-white transition
-                ${!hasActiveSession || checkingOut
+                ${!memberId || !hasActiveSession || checkingOut
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-red-600 hover:bg-red-700"
                 }`}
