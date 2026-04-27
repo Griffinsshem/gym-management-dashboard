@@ -26,12 +26,14 @@ def create_app():
     from app.api.membership_plans.routes import plans_bp
     from app.api.subscriptions.routes import subscriptions_bp
     from app.api.attendance.routes import attendance_bp
+    from app.api.plans.routes import plans_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(member_bp)
     app.register_blueprint(plans_bp)
     app.register_blueprint(subscriptions_bp)
     app.register_blueprint(attendance_bp)
+    app.register_blueprint(plans_bp)
 
 
     @app.errorhandler(400)
