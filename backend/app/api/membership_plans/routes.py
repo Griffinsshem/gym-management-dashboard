@@ -42,13 +42,9 @@ def get_plans():
     return jsonify({
         "success": True,
         "data": [
-            {
-                "id": p.id,
-                "name": p.name,
-                "price_kes": p.price_kes,
-                "duration_days": p.duration_days
-            }
-            for p in plans
+            {"id": 1, "name": "Basic Plan", "price": 1000},
+            {"id": 2, "name": "Pro Plan", "price": 2000},
+            {"id": 3, "name": "Premium Plan", "price": 3000}
         ]
     })
 
