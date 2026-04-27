@@ -11,7 +11,7 @@ import {
   addMember,
   updateMember,
   Member,
-} from "@/lib/mock/member";
+} from "@/lib/member";
 import AssignPlanModal from "@/components/subscriptions/AssignPlanModal";
 
 export default function MembersPage() {
