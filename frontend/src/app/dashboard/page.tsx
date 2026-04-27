@@ -7,19 +7,18 @@ import Navbar from "@/components/Navbar";
 import StatsCard from "@/components/StatsCard";
 import AttendanceTable from "@/components/AttendanceTable";
 import { apiClient } from "@/lib/api";
-import { getMembers } from "@/lib/mock/member";
 import toast from "react-hot-toast";
 
 export default function Dashboard() {
   const [data, setData] = useState<any[]>([]);
+  const [allAttendance, setAllAttendance] = useState<any[]>([]);
+  const [membersCount, setMembersCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [memberId, setMemberId] = useState<number | null>(null);
   const [checkingIn, setCheckingIn] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
 
-  const [membersCount, setMembersCount] = useState(0);
-  const [activeSessionsCount, setActiveSessionsCount] = useState(0);
-
+  // Load user
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
@@ -31,18 +30,12 @@ export default function Dashboard() {
 
     if (storedUser) {
       const user = JSON.parse(storedUser);
-
       const resolvedMemberId = user.member_id ?? user.id;
-
-      console.log("Resolved memberId:", resolvedMemberId);
-
       setMemberId(resolvedMemberId);
     }
-
-    fetchMembersCount();
-    fetchActiveSessions();
   }, []);
 
+  // Fetch current user attendance
   const fetchAttendance = async (id: number) => {
     try {
       setLoading(true);
@@ -59,54 +52,44 @@ export default function Dashboard() {
     }
   };
 
-  const fetchMembersCount = async () => {
+  const fetchAllAttendance = async () => {
     try {
-      const members = await getMembers();
+      const res = await apiClient.get("/members");
+      const members = res.data.data;
+
       setMembersCount(members.length);
-    } catch {
-      toast.error("Failed to fetch members");
-    }
-  };
 
-  const fetchActiveSessions = async () => {
-    try {
-      const members = await getMembers();
+      let all: any[] = [];
 
-      let activeCount = 0;
-
-      for (const member of members) {
+      for (const m of members) {
         try {
-          const res = await apiClient.get(
-            `/attendance/member/${member.id}`
-          );
-
-          const records = res.data.data || [];
-
-          const hasActive = records.some(
-            (r: any) => r.check_out_time === null
-          );
-
-          if (hasActive) activeCount++;
+          const r = await apiClient.get(`/attendance/member/${m.id}`);
+          all = [...all, ...(r.data.data || [])];
         } catch {
-          // ignore members with no attendance
+          // ignore empty users
         }
       }
 
-      setActiveSessionsCount(activeCount);
+      setAllAttendance(all);
     } catch {
-      toast.error("Failed to fetch active sessions");
+      toast.error("Failed to load global stats");
     }
   };
 
+  // Trigger
   useEffect(() => {
     if (memberId) {
       fetchAttendance(memberId);
+      fetchAllAttendance();
     }
   }, [memberId]);
 
-  const hasActiveSession = data.some(
+  // Stats
+  const hasActiveSession = data.some((r) => r.check_out_time === null);
+
+  const activeSessions = allAttendance.filter(
     (r) => r.check_out_time === null
-  );
+  ).length;
 
   const handleCheckIn = async () => {
     if (!memberId) {
@@ -123,6 +106,7 @@ export default function Dashboard() {
 
       toast.success("Checked in successfully");
       fetchAttendance(memberId);
+      fetchAllAttendance();
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Check-in failed");
     } finally {
@@ -145,6 +129,7 @@ export default function Dashboard() {
 
       toast.success("Checked out successfully");
       fetchAttendance(memberId);
+      fetchAllAttendance();
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Check-out failed");
     } finally {
@@ -164,12 +149,12 @@ export default function Dashboard() {
           <div className="grid grid-cols-3 gap-4">
             <StatsCard
               title="Total Records"
-              value={data.length.toString()}
+              value={allAttendance.length.toString()}
               icon={<ClipboardList />}
             />
             <StatsCard
               title="Active Sessions"
-              value={activeSessionsCount.toString()}
+              value={activeSessions.toString()}
               icon={<Activity />}
             />
             <StatsCard
