@@ -83,7 +83,24 @@ export default function MembersPage() {
           member={assigning}
           onClose={() => setAssigning(null)}
           onAssign={async (planId) => {
-            console.log("Assign plan:", assigning.id, planId);
+            const selectedPlan = {
+              id: planId,
+              name:
+                planId === 1
+                  ? "Basic Plan"
+                  : planId === 2
+                    ? "Pro Plan"
+                    : "Premium Plan",
+            };
+
+            setMembers((prev) =>
+              prev.map((m) =>
+                m.id === assigning.id
+                  ? { ...m, activePlan: selectedPlan }
+                  : m
+              )
+            );
+
             setAssigning(null);
           }}
         />
