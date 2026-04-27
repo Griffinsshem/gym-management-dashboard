@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getPlans, assignPlan } from "@/lib/subscription";
 
 type Plan = {
   id: number;
@@ -20,13 +21,21 @@ export default function AssignPlanModal({
   const [plans, setPlans] = useState<Plan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingPlans, setLoadingPlans] = useState(true);
 
   useEffect(() => {
-    setPlans([
-      { id: 1, name: "Basic Plan", price: 1000 },
-      { id: 2, name: "Pro Plan", price: 2000 },
-      { id: 3, name: "Premium Plan", price: 3000 },
-    ]);
+    const loadPlans = async () => {
+      try {
+        const data = await getPlans();
+        setPlans(data);
+      } catch (err) {
+        console.error("Failed to load plans");
+      } finally {
+        setLoadingPlans(false);
+      }
+    };
+
+    loadPlans();
   }, []);
 
   const handleAssign = async () => {
@@ -34,8 +43,14 @@ export default function AssignPlanModal({
 
     try {
       setLoading(true);
+
+      await assignPlan(member.id, selectedPlan);
+
       await onAssign(selectedPlan);
+
       onClose();
+    } catch (err) {
+      console.error("Failed to assign plan");
     } finally {
       setLoading(false);
     }
@@ -48,18 +63,22 @@ export default function AssignPlanModal({
           Assign Plan to {member.full_name}
         </h2>
 
-        <select
-          className="w-full border p-2 rounded mb-4 text-gray-700"
-          value={selectedPlan ?? ""}
-          onChange={(e) => setSelectedPlan(Number(e.target.value))}
-        >
-          <option value="">Select a plan</option>
-          {plans.map((plan) => (
-            <option key={plan.id} value={plan.id}>
-              {plan.name} - KES {plan.price}
-            </option>
-          ))}
-        </select>
+        {loadingPlans ? (
+          <p className="text-gray-500">Loading plans...</p>
+        ) : (
+          <select
+            className="w-full border p-2 rounded mb-4 text-gray-700"
+            value={selectedPlan ?? ""}
+            onChange={(e) => setSelectedPlan(Number(e.target.value))}
+          >
+            <option value="">Select a plan</option>
+            {plans.map((plan) => (
+              <option key={plan.id} value={plan.id}>
+                {plan.name} - KES {plan.price}
+              </option>
+            ))}
+          </select>
+        )}
 
         <div className="flex justify-end gap-2">
           <button
