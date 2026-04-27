@@ -18,6 +18,7 @@ export default function Dashboard() {
   const [checkingOut, setCheckingOut] = useState(false);
 
   const [membersCount, setMembersCount] = useState(0);
+  const [activeSessionsCount, setActiveSessionsCount] = useState(0);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -39,6 +40,7 @@ export default function Dashboard() {
     }
 
     fetchMembersCount();
+    fetchActiveSessions();
   }, []);
 
   const fetchAttendance = async (id: number) => {
@@ -63,6 +65,36 @@ export default function Dashboard() {
       setMembersCount(members.length);
     } catch {
       toast.error("Failed to fetch members");
+    }
+  };
+
+  const fetchActiveSessions = async () => {
+    try {
+      const members = await getMembers();
+
+      let activeCount = 0;
+
+      for (const member of members) {
+        try {
+          const res = await apiClient.get(
+            `/attendance/member/${member.id}`
+          );
+
+          const records = res.data.data || [];
+
+          const hasActive = records.some(
+            (r: any) => r.check_out_time === null
+          );
+
+          if (hasActive) activeCount++;
+        } catch {
+          // ignore members with no attendance
+        }
+      }
+
+      setActiveSessionsCount(activeCount);
+    } catch {
+      toast.error("Failed to fetch active sessions");
     }
   };
 
@@ -137,7 +169,7 @@ export default function Dashboard() {
             />
             <StatsCard
               title="Active Sessions"
-              value={hasActiveSession ? "1" : "0"}
+              value={activeSessionsCount.toString()}
               icon={<Activity />}
             />
             <StatsCard
