@@ -17,6 +17,7 @@ export default function MembersTable({
           <th className="p-3">Phone</th>
           <th className="p-3">Email</th>
           <th className="p-3">Actions</th>
+          <th className="p-3">Plan</th>
         </tr>
       </thead>
       <tbody>
@@ -41,6 +42,15 @@ export default function MembersTable({
               >
                 Assign Plan
               </button>
+            </td>
+            <td className="p-3">
+              {member.activePlan ? (
+                <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-sm">
+                  {member.activePlan.name}
+                </span>
+              ) : (
+                <span className="text-gray-400 text-sm">No Plan</span>
+              )}
             </td>
           </tr>
         ))}
