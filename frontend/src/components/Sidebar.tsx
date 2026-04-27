@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
+  CreditCard,
   ClipboardList,
   LogOut,
 } from "lucide-react";
@@ -29,6 +30,11 @@ export default function Sidebar() {
       name: "Plans",
       href: "/plans",
       icon: ClipboardList,
+    },
+    {
+      name: "Subscriptions",
+      href: "/subscriptions",
+      icon: CreditCard,
     },
   ];
 
