@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import StatsCard from "@/components/StatsCard";
 import AttendanceTable from "@/components/AttendanceTable";
 import { apiClient } from "@/lib/api";
+import { getMembers } from "@/lib/mock/member";
 import toast from "react-hot-toast";
 
 export default function Dashboard() {
@@ -16,7 +17,8 @@ export default function Dashboard() {
   const [checkingIn, setCheckingIn] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
 
-  // Load user ONCE
+  const [membersCount, setMembersCount] = useState(0);
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
@@ -35,9 +37,10 @@ export default function Dashboard() {
 
       setMemberId(resolvedMemberId);
     }
+
+    fetchMembersCount();
   }, []);
 
-  // Fetch attendance (OUTSIDE useEffect)
   const fetchAttendance = async (id: number) => {
     try {
       setLoading(true);
@@ -54,7 +57,15 @@ export default function Dashboard() {
     }
   };
 
-  // Trigger when memberId is ready
+  const fetchMembersCount = async () => {
+    try {
+      const members = await getMembers();
+      setMembersCount(members.length);
+    } catch {
+      toast.error("Failed to fetch members");
+    }
+  };
+
   useEffect(() => {
     if (memberId) {
       fetchAttendance(memberId);
@@ -129,7 +140,11 @@ export default function Dashboard() {
               value={hasActiveSession ? "1" : "0"}
               icon={<Activity />}
             />
-            <StatsCard title="Members" value="10" icon={<Users />} />
+            <StatsCard
+              title="Members"
+              value={membersCount.toString()}
+              icon={<Users />}
+            />
           </div>
 
           {/* Buttons */}
