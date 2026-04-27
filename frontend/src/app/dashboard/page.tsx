@@ -6,6 +6,7 @@ import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
 import StatsCard from "@/components/StatsCard";
 import AttendanceTable from "@/components/AttendanceTable";
+import AttendanceChart from "@/components/dashboard/AttendanceChart";
 import { apiClient } from "@/lib/api";
 import toast from "react-hot-toast";
 
@@ -205,6 +206,9 @@ export default function Dashboard() {
             ) : (
               <AttendanceTable data={data} />
             )}
+          </div>
+          <div className="mt-6">
+            <AttendanceChart data={data} />
           </div>
         </div>
       </div>
