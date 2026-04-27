@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
-import { getMembers, Member } from "@/lib/mock/member";
+import { getMembers, Member } from "@/lib/member";
 
 type Subscription = {
   memberName: string;
@@ -59,8 +59,8 @@ export default function SubscriptionsPage() {
                   <td className="p-3">
                     <span
                       className={`px-2 py-1 rounded text-sm ${sub.status === "Active"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-500"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-gray-100 text-gray-500"
                         }`}
                     >
                       {sub.status}
