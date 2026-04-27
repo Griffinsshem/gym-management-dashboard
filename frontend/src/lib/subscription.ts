@@ -2,7 +2,7 @@ import { apiClient } from "./api";
 
 
 export const getPlans = async () => {
-  const res = await apiClient.get("/membership-plans");
+  const res = await apiClient.get("/plans");
   return res.data.data;
 };
 
