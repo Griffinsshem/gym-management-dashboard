@@ -30,7 +30,12 @@ def create_subscription():
         }), 201
 
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 400
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 400
 
 
 @subscriptions_bp.route("", methods=["GET"])
