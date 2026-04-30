@@ -56,10 +56,13 @@ class AuthService:
             user_id=user.id
         ).first()
 
+        if not member:
+            raise ValueError("User is not linked to a member profile")
+        
         access_token = generate_access_token(user)
 
         return {
             "user": user,
             "access_token": access_token,
-            "member_id": member.id if member else None
+            "member_id": member.id
         }
