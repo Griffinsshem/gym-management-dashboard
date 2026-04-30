@@ -68,9 +68,9 @@ def get_member_attendance(member_id):
         records = attendance_service.get_member_attendance(member_id)
 
         return success_response(
-            data=records,
+            data=records or [],
             message="Attendance fetched successfully"
         )
 
-    except ValueError as e:
-        return error_response(str(e), "NOT_FOUND", 404)
+    except Exception as e:
+        return error_response(str(e), "SERVER_ERROR", 500)
