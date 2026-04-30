@@ -25,16 +25,6 @@ export default function LoginPage() {
         })
       );
 
-      localStorage.setItem("token", access_token);
-
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          id,
-          email: userEmail,
-        })
-      );
-
       router.push("/dashboard");
     } catch (err: any) {
       console.error(err);
