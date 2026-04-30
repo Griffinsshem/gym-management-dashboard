@@ -27,9 +27,10 @@ export default function AssignPlanModal({
     const loadPlans = async () => {
       try {
         const data = await getPlans();
+        console.log("Loaded plans:", data);
         setPlans(data);
       } catch (err) {
-        console.error("Failed to load plans");
+        console.error("Failed to load plans", err);
       } finally {
         setLoadingPlans(false);
       }
@@ -39,18 +40,33 @@ export default function AssignPlanModal({
   }, []);
 
   const handleAssign = async () => {
-    if (!selectedPlan) return;
+    
+    console.log("Assign button clicked");
+    console.log("Selected plan raw:", selectedPlan);
+    console.log("Type of selectedPlan:", typeof selectedPlan);
+    console.log("Member:", member);
+
+    if (!selectedPlan) {
+      console.warn("No plan selected");
+      return;
+    }
 
     try {
       setLoading(true);
+
+      console.log("Sending payload:", {
+        memberId: member.id,
+        planId: selectedPlan,
+      });
 
       await assignPlan(member.id, selectedPlan);
 
       await onAssign(selectedPlan);
 
       onClose();
-    } catch (err) {
-      console.error("Failed to assign plan");
+    } catch (err: any) {
+      console.error("Failed to assign plan", err);
+      console.error("Backend error:", err?.response?.data);
     } finally {
       setLoading(false);
     }
@@ -69,7 +85,11 @@ export default function AssignPlanModal({
           <select
             className="w-full border p-2 rounded mb-4 text-gray-700"
             value={selectedPlan ?? ""}
-            onChange={(e) => setSelectedPlan(Number(e.target.value))}
+            onChange={(e) => {
+              const value = Number(e.target.value);
+              console.log("Dropdown selected:", value);
+              setSelectedPlan(value);
+            }}
           >
             <option value="">Select a plan</option>
             {plans.map((plan) => (
