@@ -31,8 +31,16 @@ export default function Dashboard() {
 
     if (storedUser) {
       const user = JSON.parse(storedUser);
-      const resolvedMemberId = user.member_id ?? user.id;
-      setMemberId(resolvedMemberId);
+
+      console.log("Loaded user:", user);
+
+      if (!user.member_id) {
+        console.error("User has no member_id. Fix backend login response.");
+        toast.error("User profile not linked to member");
+        return;
+      }
+
+      setMemberId(user.member_id);
     }
   }, []);
 
