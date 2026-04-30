@@ -24,7 +24,7 @@ export default function PlansPage() {
         <div className="p-6 max-w-7xl mx-auto">
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold">Membership Plans</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Membership Plans</h1>
             <button
               onClick={() => setOpen(true)}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg"

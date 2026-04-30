@@ -33,7 +33,7 @@ export default function AttendanceChart({
 
   return (
     <div className="bg-white p-4 rounded-lg shadow">
-      <h2 className="text-lg font-semibold mb-4">
+      <h2 className="text-lg font-semibold mb-4 text-gray-800">
         Attendance Trends
       </h2>
 
