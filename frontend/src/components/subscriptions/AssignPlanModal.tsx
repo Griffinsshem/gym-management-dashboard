@@ -2,21 +2,24 @@
 
 import { useEffect, useState } from "react";
 import { getPlans, assignPlan } from "@/lib/subscription";
+import toast from "react-hot-toast";
 
 type Plan = {
   id: number;
   name: string;
-  price: number;
+  price_kes: number;
 };
 
 export default function AssignPlanModal({
   member,
   onClose,
   onAssign,
+  mode = "assign",
 }: {
   member: { id: number; full_name: string };
   onClose: () => void;
   onAssign: (planId: number) => Promise<void>;
+  mode?: "assign" | "renew";
 }) {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<number | null>(null);
@@ -27,10 +30,9 @@ export default function AssignPlanModal({
     const loadPlans = async () => {
       try {
         const data = await getPlans();
-        console.log("Loaded plans:", data);
         setPlans(data);
       } catch (err) {
-        console.error("Failed to load plans", err);
+        toast.error("Failed to load plans");
       } finally {
         setLoadingPlans(false);
       }
@@ -40,33 +42,29 @@ export default function AssignPlanModal({
   }, []);
 
   const handleAssign = async () => {
-    
-    console.log("Assign button clicked");
-    console.log("Selected plan raw:", selectedPlan);
-    console.log("Type of selectedPlan:", typeof selectedPlan);
-    console.log("Member:", member);
-
     if (!selectedPlan) {
-      console.warn("No plan selected");
+      toast.error("Please select a plan");
       return;
     }
 
     try {
       setLoading(true);
 
-      console.log("Sending payload:", {
-        memberId: member.id,
-        planId: selectedPlan,
-      });
-
       await assignPlan(member.id, selectedPlan);
 
       await onAssign(selectedPlan);
 
+      toast.success(
+        mode === "renew"
+          ? "Subscription renewed successfully"
+          : "Plan assigned successfully"
+      );
+
       onClose();
     } catch (err: any) {
-      console.error("Failed to assign plan", err);
-      console.error("Backend error:", err?.response?.data);
+      toast.error(
+        err?.response?.data?.error || "Operation failed"
+      );
     } finally {
       setLoading(false);
     }
@@ -76,7 +74,9 @@ export default function AssignPlanModal({
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
       <div className="bg-white rounded-lg w-[400px] p-6">
         <h2 className="text-lg font-semibold mb-4 text-gray-800">
-          Assign Plan to {member.full_name}
+          {mode === "renew"
+            ? `Renew Subscription for ${member.full_name}`
+            : `Assign Plan to ${member.full_name}`}
         </h2>
 
         {loadingPlans ? (
@@ -85,16 +85,14 @@ export default function AssignPlanModal({
           <select
             className="w-full border p-2 rounded mb-4 text-gray-700"
             value={selectedPlan ?? ""}
-            onChange={(e) => {
-              const value = Number(e.target.value);
-              console.log("Dropdown selected:", value);
-              setSelectedPlan(value);
-            }}
+            onChange={(e) =>
+              setSelectedPlan(Number(e.target.value))
+            }
           >
             <option value="">Select a plan</option>
             {plans.map((plan) => (
               <option key={plan.id} value={plan.id}>
-                {plan.name} - KES {plan.price}
+                {plan.name} - KES {plan.price_kes}
               </option>
             ))}
           </select>
@@ -113,7 +111,13 @@ export default function AssignPlanModal({
             disabled={!selectedPlan || loading}
             className="px-4 py-2 bg-blue-600 text-white rounded"
           >
-            {loading ? "Assigning..." : "Assign"}
+            {loading
+              ? mode === "renew"
+                ? "Renewing..."
+                : "Assigning..."
+              : mode === "renew"
+                ? "Renew"
+                : "Assign"}
           </button>
         </div>
       </div>
