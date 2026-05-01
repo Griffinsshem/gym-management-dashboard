@@ -23,12 +23,12 @@ export default function Dashboard() {
 
   const memberId = user?.member_id || null;
 
-  // Protect route
-  useEffect(() => {
-    if (!token) {
-      logout();
-    }
-  }, [token]);
+  // // Protect route
+  // useEffect(() => {
+  //   if (!token) {
+  //     logout();
+  //   }
+  // }, [token]);
 
   // Fetch current user attendance
   const fetchAttendance = async (id: number) => {
