@@ -1,17 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
 import PlanCard from "@/components/PlanCard";
 import CreatePlanModal from "@/components/CreatePlanModal";
 import { useAuth } from "@/context/AuthContext";
+import { getPlans } from "@/lib/subscription";
+import toast from "react-hot-toast";
 
 export default function PlansPage() {
   const [plans, setPlans] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const { isAdmin } = useAuth();
+
+  const fetchPlans = async () => {
+    try {
+      setLoading(true);
+      const data = await getPlans();
+      setPlans(data);
+    } catch (err: any) {
+      toast.error("Failed to load plans");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPlans();
+  }, []);
 
   const handleAddPlan = (plan: any) => {
     setPlans((prev) => [...prev, plan]);
@@ -41,8 +60,12 @@ export default function PlansPage() {
             )}
           </div>
 
-          {/* Plans Grid */}
-          {plans.length === 0 ? (
+          {/* Loading State */}
+          {loading ? (
+            <div className="text-center py-10 text-gray-500">
+              Loading plans...
+            </div>
+          ) : plans.length === 0 ? (
             <div className="text-center text-gray-500 py-10">
               <p className="text-lg font-medium">No plans yet</p>
               <p className="text-sm">Create your first membership plan</p>
@@ -61,7 +84,9 @@ export default function PlansPage() {
         <CreatePlanModal
           open={open}
           onClose={() => setOpen(false)}
-          onCreate={handleAddPlan}
+          onCreate={(newPlan) => {
+            handleAddPlan(newPlan);
+          }}
         />
       )}
     </div>
