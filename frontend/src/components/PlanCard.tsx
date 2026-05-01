@@ -14,9 +14,11 @@ type Plan = {
 export default function PlanCard({
   plan,
   onDeleteSuccess,
+  onEdit,
 }: {
   plan: Plan;
   onDeleteSuccess: () => void;
+  onEdit: (plan: Plan) => void;
 }) {
   const { isAdmin } = useAuth();
 
@@ -54,6 +56,13 @@ export default function PlanCard({
       {/* Admin Actions */}
       {isAdmin && (
         <div className="mt-4 flex gap-2">
+          <button
+            onClick={() => onEdit(plan)}
+            className="bg-yellow-500 text-white px-3 py-1 rounded text-sm"
+          >
+            Edit
+          </button>
+
           <button
             onClick={handleDelete}
             className="bg-red-600 text-white px-3 py-1 rounded text-sm"

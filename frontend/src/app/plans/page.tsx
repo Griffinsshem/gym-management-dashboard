@@ -13,6 +13,7 @@ export default function PlansPage() {
   const [plans, setPlans] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [selectedPlan, setSelectedPlan] = useState<any | null>(null);
 
   const { isAdmin } = useAuth();
 
@@ -48,7 +49,10 @@ export default function PlansPage() {
 
             {isAdmin && (
               <button
-                onClick={() => setOpen(true)}
+                onClick={() => {
+                  setSelectedPlan(null);
+                  setOpen(true);
+                }}
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg"
               >
                 + Create Plan
@@ -69,7 +73,14 @@ export default function PlansPage() {
           ) : (
             <div className="grid grid-cols-3 gap-4">
               {plans.map((plan, index) => (
-                <PlanCard key={plan.id} plan={plan} onDeleteSuccess={fetchPlans} />
+                <PlanCard
+                  key={plan.id}
+                  plan={plan}
+                  onDeleteSuccess={fetchPlans}
+                  onEdit={(plan) => {
+                    setSelectedPlan(plan);
+                    setOpen(true);
+                  }} />
               ))}
             </div>
           )}
@@ -79,10 +90,12 @@ export default function PlansPage() {
       {isAdmin && (
         <CreatePlanModal
           open={open}
-          onClose={() => setOpen(false)}
-          onCreate={async () => {
-            await fetchPlans();
+          onClose={() => {
+            setOpen(false);
+            setSelectedPlan(null);
           }}
+          onSuccess={fetchPlans}
+          initialData={selectedPlan}
         />
       )}
     </div>
