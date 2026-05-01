@@ -36,6 +36,7 @@ def create_plan():
 
 
 @plans_bp.route("", methods=["GET"])
+@jwt_required
 def get_plans():
     plans = plan_service.get_plans()
 
