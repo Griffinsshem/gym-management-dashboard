@@ -69,7 +69,7 @@ export default function PlansPage() {
           ) : (
             <div className="grid grid-cols-3 gap-4">
               {plans.map((plan, index) => (
-                <PlanCard key={index} plan={plan} />
+                <PlanCard key={plan.id} plan={plan} onDeleteSuccess={fetchPlans} />
               ))}
             </div>
           )}
