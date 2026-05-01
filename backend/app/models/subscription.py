@@ -20,3 +20,4 @@ class MembershipSubscription(db.Model, TimestampMixin):
 
     status = db.Column(db.Enum(SubscriptionStatus), default=SubscriptionStatus.active)
     payment_reference = db.Column(db.String(120))
+    plan = db.relationship("MembershipPlan", backref="subscriptions")

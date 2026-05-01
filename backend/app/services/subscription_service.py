@@ -52,3 +52,29 @@ class SubscriptionService:
         self.subscription_repo.update(subscription)
 
         return subscription
+    
+    def get_dashboard_stats(self):
+        subscriptions = self.subscription_repo.get_all()
+
+        total_revenue = 0
+        active_count = 0
+        expiring_soon = 0
+
+        now = datetime.utcnow()
+        next_7_days = now + timedelta(days=7)
+
+        for sub in subscriptions:
+            if sub.status == SubscriptionStatus.active:
+               active_count += 1
+
+               if sub.plan:
+                   total_revenue += sub.plan.price_kes
+
+               if sub.end_date and now <= sub.end_date <= next_7_days:
+                expiring_soon += 1
+
+        return {
+            "total_revenue": total_revenue,
+            "active_subscriptions": active_count,
+            "expiring_soon": expiring_soon,
+       }
