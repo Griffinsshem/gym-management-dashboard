@@ -117,3 +117,20 @@ def cancel_subscription(sub_id):
 
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 400
+    
+@subscriptions_bp.route("/dashboard/stats", methods=["GET"])
+@jwt_required
+def get_dashboard_stats():
+    try:
+        stats = subscription_service.get_dashboard_stats()
+
+        return jsonify({
+            "success": True,
+            "data": stats
+        })
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
