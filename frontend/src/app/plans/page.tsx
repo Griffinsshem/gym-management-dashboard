@@ -5,10 +5,13 @@ import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
 import PlanCard from "@/components/PlanCard";
 import CreatePlanModal from "@/components/CreatePlanModal";
+import { useAuth } from "@/context/AuthContext";
 
 export default function PlansPage() {
   const [plans, setPlans] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
+
+  const { isAdmin } = useAuth();
 
   const handleAddPlan = (plan: any) => {
     setPlans((prev) => [...prev, plan]);
@@ -24,13 +27,18 @@ export default function PlansPage() {
         <div className="p-6 max-w-7xl mx-auto">
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-800">Membership Plans</h1>
-            <button
-              onClick={() => setOpen(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg"
-            >
-              + Create Plan
-            </button>
+            <h1 className="text-2xl font-bold text-gray-800">
+              Membership Plans
+            </h1>
+
+            {isAdmin && (
+              <button
+                onClick={() => setOpen(true)}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+              >
+                + Create Plan
+              </button>
+            )}
           </div>
 
           {/* Plans Grid */}
@@ -49,11 +57,13 @@ export default function PlansPage() {
         </div>
       </div>
 
-      <CreatePlanModal
-        open={open}
-        onClose={() => setOpen(false)}
-        onCreate={handleAddPlan}
-      />
+      {isAdmin && (
+        <CreatePlanModal
+          open={open}
+          onClose={() => setOpen(false)}
+          onCreate={handleAddPlan}
+        />
+      )}
     </div>
   );
 }
