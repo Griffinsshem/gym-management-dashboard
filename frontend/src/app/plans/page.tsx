@@ -32,10 +32,6 @@ export default function PlansPage() {
     fetchPlans();
   }, []);
 
-  const handleAddPlan = (plan: any) => {
-    setPlans((prev) => [...prev, plan]);
-  };
-
   return (
     <div className="flex">
       <Sidebar />
@@ -84,8 +80,8 @@ export default function PlansPage() {
         <CreatePlanModal
           open={open}
           onClose={() => setOpen(false)}
-          onCreate={(newPlan) => {
-            handleAddPlan(newPlan);
+          onCreate={async () => {
+            await fetchPlans();
           }}
         />
       )}
