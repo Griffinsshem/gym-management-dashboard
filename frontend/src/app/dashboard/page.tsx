@@ -21,16 +21,15 @@ export default function Dashboard() {
   const [checkingIn, setCheckingIn] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
 
+  const [stats, setStats] = useState({
+    total_revenue: 0,
+    active_subscriptions: 0,
+    expiring_soon: 0,
+  });
+
   const memberId = user?.member_id || null;
 
-  // // Protect route
-  // useEffect(() => {
-  //   if (!token) {
-  //     logout();
-  //   }
-  // }, [token]);
-
-  // Fetch current user attendance
+  // Fetch attendance
   const fetchAttendance = async (id: number) => {
     try {
       setLoading(true);
@@ -61,7 +60,7 @@ export default function Dashboard() {
           const r = await apiClient.get(`/attendance/member/${m.id}`);
           all = [...all, ...(r.data.data || [])];
         } catch {
-          // ignore empty users
+          // ignore
         }
       }
 
@@ -71,15 +70,26 @@ export default function Dashboard() {
     }
   };
 
-  // Trigger data load
+
+  const fetchDashboardStats = async () => {
+    try {
+      const res = await apiClient.get(
+        "/subscriptions/dashboard/stats"
+      );
+      setStats(res.data.data);
+    } catch {
+      toast.error("Failed to load dashboard stats");
+    }
+  };
+
   useEffect(() => {
     if (!memberId) return;
 
     fetchAttendance(memberId);
     fetchAllAttendance();
+    fetchDashboardStats();
   }, [memberId]);
 
-  // Stats
   const hasActiveSession = data.some((r) => r.check_out_time === null);
 
   const activeSessions = allAttendance.filter(
@@ -102,6 +112,7 @@ export default function Dashboard() {
       toast.success("Checked in successfully");
       fetchAttendance(memberId);
       fetchAllAttendance();
+      fetchDashboardStats();
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Check-in failed");
     } finally {
@@ -125,6 +136,7 @@ export default function Dashboard() {
       toast.success("Checked out successfully");
       fetchAttendance(memberId);
       fetchAllAttendance();
+      fetchDashboardStats();
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Check-out failed");
     } finally {
@@ -140,21 +152,22 @@ export default function Dashboard() {
         <Navbar />
 
         <div className="p-6 max-w-7xl mx-auto">
-          {/* Stats */}
           <div className="grid grid-cols-3 gap-4">
             <StatsCard
-              title="Total Records"
-              value={allAttendance.length.toString()}
+              title="Revenue (KES)"
+              value={stats.total_revenue.toString()}
               icon={<ClipboardList />}
             />
+
             <StatsCard
-              title="Active Sessions"
-              value={activeSessions.toString()}
+              title="Active Subscriptions"
+              value={stats.active_subscriptions.toString()}
               icon={<Activity />}
             />
+
             <StatsCard
-              title="Members"
-              value={membersCount.toString()}
+              title="Expiring Soon"
+              value={stats.expiring_soon.toString()}
               icon={<Users />}
             />
           </div>
@@ -170,7 +183,9 @@ export default function Dashboard() {
                   : "bg-green-600 hover:bg-green-700"
                 }`}
             >
-              {checkingIn && <Loader2 className="animate-spin w-4 h-4" />}
+              {checkingIn && (
+                <Loader2 className="animate-spin w-4 h-4" />
+              )}
               {checkingIn ? "Checking In..." : "Check In"}
             </button>
 
@@ -183,7 +198,9 @@ export default function Dashboard() {
                   : "bg-red-600 hover:bg-red-700"
                 }`}
             >
-              {checkingOut && <Loader2 className="animate-spin w-4 h-4" />}
+              {checkingOut && (
+                <Loader2 className="animate-spin w-4 h-4" />
+              )}
               {checkingOut ? "Checking Out..." : "Check Out"}
             </button>
           </div>
