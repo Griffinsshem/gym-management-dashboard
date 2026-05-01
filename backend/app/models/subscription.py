@@ -2,10 +2,12 @@ from app.extensions import db
 from .base import TimestampMixin
 import enum
 
+
 class SubscriptionStatus(enum.Enum):
     active = "active"
     expired = "expired"
     cancelled = "cancelled"
+
 
 class MembershipSubscription(db.Model, TimestampMixin):
     __tablename__ = "subscriptions"
@@ -20,4 +22,8 @@ class MembershipSubscription(db.Model, TimestampMixin):
 
     status = db.Column(db.Enum(SubscriptionStatus), default=SubscriptionStatus.active)
     payment_reference = db.Column(db.String(120))
-    plan = db.relationship("MembershipPlan", backref="subscriptions")
+
+    plan = db.relationship(
+        "MembershipPlan",
+        back_populates="subscriptions"
+    )
