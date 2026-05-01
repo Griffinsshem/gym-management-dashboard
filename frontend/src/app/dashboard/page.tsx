@@ -9,40 +9,26 @@ import AttendanceTable from "@/components/AttendanceTable";
 import AttendanceChart from "@/components/dashboard/AttendanceChart";
 import { apiClient } from "@/lib/api";
 import toast from "react-hot-toast";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Dashboard() {
+  const { user, token, logout } = useAuth();
+
   const [data, setData] = useState<any[]>([]);
   const [allAttendance, setAllAttendance] = useState<any[]>([]);
   const [membersCount, setMembersCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [memberId, setMemberId] = useState<number | null>(null);
   const [checkingIn, setCheckingIn] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
 
-  // Load user
+  const memberId = user?.member_id || null;
+
+  // Protect route
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
-
     if (!token) {
-      window.location.href = "/login";
-      return;
+      logout();
     }
-
-    if (storedUser) {
-      const user = JSON.parse(storedUser);
-
-      console.log("Loaded user:", user);
-
-      if (!user.member_id) {
-        console.error("User has no member_id. Fix backend login response.");
-        toast.error("User profile not linked to member");
-        return;
-      }
-
-      setMemberId(user.member_id);
-    }
-  }, []);
+  }, [token]);
 
   // Fetch current user attendance
   const fetchAttendance = async (id: number) => {
@@ -85,12 +71,12 @@ export default function Dashboard() {
     }
   };
 
-  // Trigger
+  // Trigger data load
   useEffect(() => {
-    if (memberId) {
-      fetchAttendance(memberId);
-      fetchAllAttendance();
-    }
+    if (!memberId) return;
+
+    fetchAttendance(memberId);
+    fetchAllAttendance();
   }, [memberId]);
 
   // Stats
@@ -215,6 +201,7 @@ export default function Dashboard() {
               <AttendanceTable data={data} />
             )}
           </div>
+
           <div className="mt-6">
             <AttendanceChart data={data} />
           </div>
