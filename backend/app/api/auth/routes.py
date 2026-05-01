@@ -50,6 +50,7 @@ def login():
             data={
                 "id": result["user"].id,
                 "email": result["user"].email,
+                "role": result["user"].role.value,
                 "access_token": result["access_token"],
                 "member_id": result["member_id"]
             },

@@ -14,7 +14,7 @@ export default function LoginPage() {
     try {
       const res = await loginUser(form.email, form.password);
 
-      const { access_token, id, email: userEmail, member_id } = res;
+      const { access_token, id, email: userEmail, member_id, role } = res;
 
       login({
         token: access_token,
@@ -22,6 +22,7 @@ export default function LoginPage() {
           id,
           email: userEmail,
           member_id,
+          role,
         },
       });
 
