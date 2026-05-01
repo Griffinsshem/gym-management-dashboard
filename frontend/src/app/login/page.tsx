@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { loginUser } from "@/lib/auth";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [form, setForm] = useState({ email: "", password: "" });
 
   const handleLogin = async () => {
@@ -14,16 +16,14 @@ export default function LoginPage() {
 
       const { access_token, id, email: userEmail, member_id } = res;
 
-      localStorage.setItem("token", access_token);
-
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
+      login({
+        token: access_token,
+        user: {
           id,
           email: userEmail,
           member_id,
-        })
-      );
+        },
+      });
 
       router.push("/dashboard");
     } catch (err: any) {

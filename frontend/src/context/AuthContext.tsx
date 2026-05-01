@@ -5,13 +5,13 @@ import { createContext, useContext, useEffect, useState } from "react";
 type UserType = {
   id: number;
   email: string;
-  member_id?: number | null;
+  member_id: number;
 };
 
 type AuthContextType = {
   user: UserType | null;
-  loading: boolean;
-  login: (userData: UserType, token: string) => void;
+  token: string | null;
+  login: (data: { user: UserType; token: string }) => void;
   logout: () => void;
 };
 
@@ -19,36 +19,39 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<UserType | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState<string | null>(null);
 
+  // Load from localStorage on app start
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
+    const storedToken = localStorage.getItem("token");
 
-    if (storedUser && token) {
+    if (storedUser && storedToken) {
       setUser(JSON.parse(storedUser));
+      setToken(storedToken);
     }
-
-    setLoading(false);
   }, []);
 
-  const login = (userData: UserType, token: string) => {
+  const login = ({ user, token }: { user: UserType; token: string }) => {
+    localStorage.setItem("user", JSON.stringify(user));
     localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(userData));
 
-    setUser(userData);
+    setUser(user);
+    setToken(token);
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("token");
 
     setUser(null);
+    setToken(null);
+
     window.location.href = "/login";
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
