@@ -134,3 +134,27 @@ def get_dashboard_stats():
             "success": False,
             "error": str(e)
         }), 500
+    
+
+@subscriptions_bp.route("/expiring", methods=["GET"])
+@jwt_required
+def get_expiring_subscriptions():
+    try:
+        subs = subscription_service.get_expiring_soon()
+
+        return jsonify({
+            "success": True,
+            "data": [
+                {
+                    "id": s.id,
+                    "member_id": s.member_id,
+                    "plan_id": s.plan_id,
+                    "end_date": s.end_date,
+                    "status": s.status.value
+                }
+                for s in subs
+            ]
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 400

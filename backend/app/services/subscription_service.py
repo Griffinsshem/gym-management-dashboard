@@ -78,3 +78,7 @@ class SubscriptionService:
             "active_subscriptions": active_count,
             "expiring_soon": expiring_soon,
        }
+    
+
+    def get_expiring_soon(self, days=7):
+        return self.subscription_repo.get_expiring_soon(days)

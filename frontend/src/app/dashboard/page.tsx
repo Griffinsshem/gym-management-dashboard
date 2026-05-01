@@ -20,6 +20,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [checkingIn, setCheckingIn] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
+  const [expiringSubs, setExpiringSubs] = useState<any[]>([]);
 
   const [stats, setStats] = useState({
     total_revenue: 0,
@@ -82,12 +83,22 @@ export default function Dashboard() {
     }
   };
 
+  const fetchExpiring = async () => {
+    try {
+      const res = await apiClient.get("/subscriptions/expiring");
+      setExpiringSubs(res.data.data);
+    } catch {
+      toast.error("Failed to load expiring subscriptions");
+    }
+  };
+
   useEffect(() => {
     if (!memberId) return;
 
     fetchAttendance(memberId);
     fetchAllAttendance();
     fetchDashboardStats();
+    fetchExpiring();
   }, [memberId]);
 
   const hasActiveSession = data.some((r) => r.check_out_time === null);
@@ -221,6 +232,34 @@ export default function Dashboard() {
 
           <div className="mt-6">
             <AttendanceChart data={data} />
+          </div>
+          <div className="mt-8 bg-white p-4 rounded-xl shadow">
+            <h2 className="text-lg font-semibold mb-3 text-gray-800">
+              Expiring Soon
+            </h2>
+
+            {expiringSubs.length === 0 ? (
+              <p className="text-gray-500 text-sm">
+                No subscriptions expiring soon
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {expiringSubs.map((sub) => (
+                  <div
+                    key={sub.id}
+                    className="flex justify-between items-center border p-2 rounded"
+                  >
+                    <span className="text-sm text-gray-800">
+                      Member #{sub.member_id}
+                    </span>
+
+                    <span className="text-sm text-red-500">
+                      Ends: {new Date(sub.end_date).toLocaleDateString()}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

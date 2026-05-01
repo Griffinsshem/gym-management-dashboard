@@ -1,4 +1,5 @@
-from app.models import MembershipSubscription
+from datetime import datetime, timedelta
+from app.models import MembershipSubscription, SubscriptionStatus
 from app.extensions import db
 
 
@@ -21,3 +22,13 @@ class SubscriptionRepository:
     def update(self, subscription):
         db.session.commit()
         return subscription
+
+    def get_expiring_soon(self, days=7):
+        now = datetime.utcnow()
+        threshold = now + timedelta(days=days)
+
+        return MembershipSubscription.query.filter(
+            MembershipSubscription.status == SubscriptionStatus.active,
+            MembershipSubscription.end_date >= now,
+            MembershipSubscription.end_date <= threshold
+        ).all()
