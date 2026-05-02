@@ -3,31 +3,38 @@
 import { useEffect, useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
-import { getMembers, Member } from "@/lib/member";
+import { apiClient } from "@/lib/api";
+import toast from "react-hot-toast";
 
 type Subscription = {
-  memberName: string;
-  planName: string;
-  status: "Active" | "None";
+  id: number;
+  member_id: number;
+  plan_id: number;
+  status: string;
+  start_date: string;
+  end_date: string;
 };
 
 export default function SubscriptionsPage() {
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [subs, setSubs] = useState<Subscription[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadSubscriptions = async () => {
+    try {
+      setLoading(true);
+
+      const res = await apiClient.get("/subscriptions");
+      setSubs(res.data.data);
+
+    } catch {
+      toast.error("Failed to load subscriptions");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const load = async () => {
-      const members = await getMembers();
-
-      const subs: Subscription[] = members.map((m) => ({
-        memberName: m.full_name,
-        planName: m.activePlan?.name || "-",
-        status: m.activePlan ? "Active" : "None",
-      }));
-
-      setSubscriptions(subs);
-    };
-
-    load();
+    loadSubscriptions();
   }, []);
 
   return (
@@ -42,34 +49,51 @@ export default function SubscriptionsPage() {
             Subscriptions
           </h1>
 
-          <table className="w-full bg-white shadow rounded-lg">
-            <thead>
-              <tr className="text-left border-b text-gray-600">
-                <th className="p-3">Member</th>
-                <th className="p-3">Plan</th>
-                <th className="p-3">Status</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {subscriptions.map((sub, idx) => (
-                <tr key={idx} className="border-b text-gray-700">
-                  <td className="p-3">{sub.memberName}</td>
-                  <td className="p-3">{sub.planName}</td>
-                  <td className="p-3">
-                    <span
-                      className={`px-2 py-1 rounded text-sm ${sub.status === "Active"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-gray-100 text-gray-500"
-                        }`}
-                    >
-                      {sub.status}
-                    </span>
-                  </td>
+          {loading ? (
+            <p className="text-gray-500">Loading...</p>
+          ) : (
+            <table className="w-full bg-white shadow rounded-lg">
+              <thead>
+                <tr className="text-left border-b text-gray-600">
+                  <th className="p-3">Member ID</th>
+                  <th className="p-3">Plan ID</th>
+                  <th className="p-3">Status</th>
+                  <th className="p-3">Start</th>
+                  <th className="p-3">End</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+
+              <tbody>
+                {subs.map((s) => (
+                  <tr key={s.id} className="border-b text-gray-700">
+                    <td className="p-3">{s.member_id}</td>
+                    <td className="p-3">{s.plan_id}</td>
+
+                    <td className="p-3">
+                      <span
+                        className={`px-2 py-1 rounded text-sm ${s.status === "active"
+                            ? "bg-green-100 text-green-700"
+                            : s.status === "cancelled"
+                              ? "bg-red-100 text-red-600"
+                              : "bg-gray-100 text-gray-500"
+                          }`}
+                      >
+                        {s.status}
+                      </span>
+                    </td>
+
+                    <td className="p-3">
+                      {new Date(s.start_date).toLocaleDateString()}
+                    </td>
+
+                    <td className="p-3">
+                      {new Date(s.end_date).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>
