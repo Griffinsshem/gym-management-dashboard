@@ -9,7 +9,9 @@ import toast from "react-hot-toast";
 type Subscription = {
   id: number;
   member_id: number;
+  member_name: string;
   plan_id: number;
+  plan_name: string;
   status: string;
   start_date: string;
   end_date: string;
@@ -57,25 +59,27 @@ export default function SubscriptionsPage() {
                 <tr className="text-left border-b text-gray-600">
                   <th className="p-3">Member ID</th>
                   <th className="p-3">Plan ID</th>
+                  <th className="p-3">Member</th>
+                  <th className="p-3">Plan</th>
                   <th className="p-3">Status</th>
                   <th className="p-3">Start</th>
                   <th className="p-3">End</th>
                 </tr>
               </thead>
-
               <tbody>
                 {subs.map((s) => (
                   <tr key={s.id} className="border-b text-gray-700">
                     <td className="p-3">{s.member_id}</td>
                     <td className="p-3">{s.plan_id}</td>
-
+                    <td className="p-3">{s.member_name}</td>
+                    <td className="p-3">{s.plan_name}</td>
                     <td className="p-3">
                       <span
                         className={`px-2 py-1 rounded text-sm ${s.status === "active"
-                            ? "bg-green-100 text-green-700"
-                            : s.status === "cancelled"
-                              ? "bg-red-100 text-red-600"
-                              : "bg-gray-100 text-gray-500"
+                          ? "bg-green-100 text-green-700"
+                          : s.status === "cancelled"
+                            ? "bg-red-100 text-red-600"
+                            : "bg-gray-100 text-gray-500"
                           }`}
                       >
                         {s.status}
