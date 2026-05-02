@@ -11,4 +11,6 @@ class Attendance(db.Model):
     check_in_time = db.Column(db.DateTime, default=datetime.utcnow)
     check_out_time = db.Column(db.DateTime, nullable=True)
 
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    member = db.relationship("Member", back_populates="attendances")
+
+    # created_at = db.Column(db.DateTime, default=datetime.utcnow)
