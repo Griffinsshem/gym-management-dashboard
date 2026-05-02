@@ -14,6 +14,7 @@ import {
 } from "@/lib/member";
 import AssignPlanModal from "@/components/subscriptions/AssignPlanModal";
 import { apiClient } from "@/lib/api";
+import { getPlans } from "@/lib/subscription";
 import toast from "react-hot-toast";
 
 type Subscription = {
@@ -23,9 +24,15 @@ type Subscription = {
   status: string;
 };
 
+type Plan = {
+  id: number;
+  name: string;
+};
+
 export default function MembersPage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [plans, setPlans] = useState<Plan[]>([]);
 
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<Member | null>(null);
@@ -51,10 +58,23 @@ export default function MembersPage() {
     }
   };
 
+  const loadPlans = async () => {
+    try {
+      const data = await getPlans();
+      setPlans(data);
+    } catch {
+      toast.error("Failed to load plans");
+    }
+  };
+
   useEffect(() => {
     const loadAll = async () => {
       setLoading(true);
-      await Promise.all([loadMembers(), loadSubscriptions()]);
+      await Promise.all([
+        loadMembers(),
+        loadSubscriptions(),
+        loadPlans(),
+      ]);
       setLoading(false);
     };
 
@@ -64,8 +84,10 @@ export default function MembersPage() {
   const subscriptionsByMember = subscriptions.reduce(
     (acc: any, sub: Subscription) => {
       if (sub.status === "active") {
+        const plan = plans.find((p) => p.id === sub.plan_id);
+
         acc[sub.member_id] = {
-          plan_name: `Plan ${sub.plan_id}`,
+          plan_name: plan?.name || "Unknown Plan",
           status: sub.status,
         };
       }
@@ -113,9 +135,16 @@ export default function MembersPage() {
         <AddMemberModal
           onClose={() => setShowAdd(false)}
           onSave={async (data) => {
-            await addMember(data);
-            setShowAdd(false);
-            await loadMembers();
+            try {
+              await addMember(data);
+              toast.success("Member created");
+              setShowAdd(false);
+              await loadMembers();
+            } catch (err: any) {
+              toast.error(
+                err.response?.data?.error || "Failed to create member"
+              );
+            }
           }}
         />
       )}
@@ -126,9 +155,14 @@ export default function MembersPage() {
           member={editing}
           onClose={() => setEditing(null)}
           onSave={async (data) => {
-            await updateMember(editing.id, data);
-            setEditing(null);
-            await loadMembers();
+            try {
+              await updateMember(editing.id, data);
+              toast.success("Member updated");
+              setEditing(null);
+              await loadMembers();
+            } catch {
+              toast.error("Failed to update member");
+            }
           }}
         />
       )}
