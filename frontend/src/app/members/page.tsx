@@ -65,7 +65,7 @@ export default function MembersPage() {
     (acc: any, sub: Subscription) => {
       if (sub.status === "active") {
         acc[sub.member_id] = {
-          plan_name: `Plan #${sub.plan_id}`,
+          plan_name: `Plan ${sub.plan_id}`,
           status: sub.status,
         };
       }
