@@ -31,7 +31,7 @@ export default function AssignPlanModal({
       try {
         const data = await getPlans();
         setPlans(data);
-      } catch (err) {
+      } catch {
         toast.error("Failed to load plans");
       } finally {
         setLoadingPlans(false);
@@ -71,23 +71,42 @@ export default function AssignPlanModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-      <div className="bg-white rounded-lg w-[400px] p-6">
+    <div
+      className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-xl w-[400px] p-6 shadow-lg"
+        onClick={(e) => e.stopPropagation()}
+      >
         <h2 className="text-lg font-semibold mb-4 text-gray-800">
           {mode === "renew"
-            ? `Renew Subscription for ${member.full_name}`
-            : `Assign Plan to ${member.full_name}`}
+            ? `Renew Subscription`
+            : `Assign Plan`}
         </h2>
 
+        <p className="text-sm text-gray-500 mb-4">
+          {member.full_name}
+        </p>
+
+        {/* Plans */}
         {loadingPlans ? (
-          <p className="text-gray-500">Loading plans...</p>
+          <p className="text-gray-500 text-sm">
+            Loading plans...
+          </p>
+        ) : plans.length === 0 ? (
+          <p className="text-red-500 text-sm">
+            No plans available
+          </p>
         ) : (
           <select
             className="w-full border p-2 rounded mb-4 text-gray-700"
             value={selectedPlan ?? ""}
-            onChange={(e) =>
-              setSelectedPlan(Number(e.target.value))
-            }
+            disabled={loading}
+            onChange={(e) => {
+              const value = e.target.value;
+              setSelectedPlan(value ? Number(value) : null);
+            }}
           >
             <option value="">Select a plan</option>
             {plans.map((plan) => (
@@ -98,10 +117,12 @@ export default function AssignPlanModal({
           </select>
         )}
 
+        {/* Actions */}
         <div className="flex justify-end gap-2">
           <button
             onClick={onClose}
-            className="px-4 py-2 border rounded text-gray-700 hover:bg-gray-100"
+            disabled={loading}
+            className="px-4 py-2 border rounded text-gray-700 hover:bg-gray-100 transition"
           >
             Cancel
           </button>
@@ -109,7 +130,7 @@ export default function AssignPlanModal({
           <button
             onClick={handleAssign}
             disabled={!selectedPlan || loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded"
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:bg-gray-400"
           >
             {loading
               ? mode === "renew"
