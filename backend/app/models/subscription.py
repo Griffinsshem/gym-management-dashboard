@@ -27,3 +27,4 @@ class MembershipSubscription(db.Model, TimestampMixin):
         "MembershipPlan",
         back_populates="subscriptions"
     )
+    member = db.relationship("Member", backref="subscriptions")

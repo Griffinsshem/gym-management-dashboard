@@ -33,26 +33,43 @@ class SubscriptionService:
 
         return self.subscription_repo.create(subscription)
 
+    def _format_subscription(self, sub):
+        return {
+            "id": sub.id,
+            "member_id": sub.member_id,
+            "member_name": sub.member.full_name if sub.member else None,
+            "plan_id": sub.plan_id,
+            "plan_name": sub.plan.name if sub.plan else None,
+            "status": sub.status.value,
+            "start_date": sub.start_date,
+            "end_date": sub.end_date
+        }
+
     def get_subscriptions(self):
-        return self.subscription_repo.get_all()
+        subs = self.subscription_repo.get_all()
+        return [self._format_subscription(s) for s in subs]
 
     def get_subscription(self, subscription_id):
         subscription = self.subscription_repo.get_by_id(subscription_id)
         if not subscription:
             raise ValueError("Subscription not found")
-        return subscription
+
+        return self._format_subscription(subscription)
 
     def get_member_subscriptions(self, member_id):
-        return self.subscription_repo.get_by_member(member_id)
+        subs = self.subscription_repo.get_by_member(member_id)
+        return [self._format_subscription(s) for s in subs]
 
     def cancel_subscription(self, subscription_id):
-        subscription = self.get_subscription(subscription_id)
+        subscription = self.subscription_repo.get_by_id(subscription_id)
+        if not subscription:
+            raise ValueError("Subscription not found")
 
         subscription.status = SubscriptionStatus.cancelled
         self.subscription_repo.update(subscription)
 
         return subscription
-    
+
     def get_dashboard_stats(self):
         subscriptions = self.subscription_repo.get_all()
 
@@ -65,20 +82,20 @@ class SubscriptionService:
 
         for sub in subscriptions:
             if sub.status == SubscriptionStatus.active:
-               active_count += 1
+                active_count += 1
 
-               if sub.plan:
-                   total_revenue += sub.plan.price_kes
+                if sub.plan:
+                    total_revenue += sub.plan.price_kes
 
-               if sub.end_date and now <= sub.end_date <= next_7_days:
-                expiring_soon += 1
+                if sub.end_date and now <= sub.end_date <= next_7_days:
+                    expiring_soon += 1
 
         return {
             "total_revenue": total_revenue,
             "active_subscriptions": active_count,
             "expiring_soon": expiring_soon,
-       }
-    
+        }
 
     def get_expiring_soon(self, days=7):
-        return self.subscription_repo.get_expiring_soon(days)
+        subs = self.subscription_repo.get_expiring_soon(days)
+        return [self._format_subscription(s) for s in subs]
