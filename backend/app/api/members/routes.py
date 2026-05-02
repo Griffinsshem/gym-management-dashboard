@@ -44,13 +44,7 @@ def list_members():
 
     return jsonify({
         "success": True,
-        "data": [
-            {
-                "id": m.id,
-                "full_name": m.full_name,
-                "phone": m.phone
-            } for m in members
-        ]
+        "data": members
     })
 
 
