@@ -5,12 +5,8 @@ export type Member = {
   full_name: string;
   phone: string;
   email?: string;
-
-  activePlan?: {
-    id: number;
-    name: string;
-  } | null;
 };
+
 
 export const getMembers = async (): Promise<Member[]> => {
   const res = await apiClient.get("/members");
@@ -20,23 +16,35 @@ export const getMembers = async (): Promise<Member[]> => {
     full_name: m.full_name,
     phone: m.phone,
     email: m.email || "",
-    activePlan: null,
   }));
 };
 
-export const addMember = async (
-  member: Omit<Member, "id">
-): Promise<Member> => {
-  const res = await apiClient.post("/members", member);
+export const addMember = async (member: {
+  full_name: string;
+  phone: string;
+  email?: string;
+  gender?: string;
+  date_of_birth?: string;
+}): Promise<Member> => {
+
+  const payload = {
+    full_name: member.full_name,
+    phone: member.phone,
+    email: member.email || null,
+    gender: member.gender || null,
+    date_of_birth: member.date_of_birth || null,
+  };
+
+  const res = await apiClient.post("/members", payload);
 
   return {
     id: res.data.data.id,
     full_name: res.data.data.full_name,
     phone: res.data.data.phone,
-    email: member.email || "",
-    activePlan: null,
+    email: payload.email || "",
   };
 };
+
 
 export const updateMember = async (
   id: number,
