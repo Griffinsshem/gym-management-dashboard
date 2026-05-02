@@ -25,6 +25,7 @@ def create_subscription():
                 "id": sub.id,
                 "member_id": sub.member_id,
                 "plan_id": sub.plan_id,
+                "plan_name": sub.plan.name,  
                 "status": sub.status.value
             }
         }), 201
@@ -50,6 +51,7 @@ def get_subscriptions():
                 "id": s.id,
                 "member_id": s.member_id,
                 "plan_id": s.plan_id,
+                "plan_name": s.plan.name, 
                 "status": s.status.value,
                 "start_date": s.start_date,
                 "end_date": s.end_date
@@ -71,6 +73,7 @@ def get_subscription(sub_id):
                 "id": s.id,
                 "member_id": s.member_id,
                 "plan_id": s.plan_id,
+                "plan_name": s.plan.name, 
                 "status": s.status.value,
                 "start_date": s.start_date,
                 "end_date": s.end_date
@@ -92,6 +95,7 @@ def get_member_subscriptions(member_id):
             {
                 "id": s.id,
                 "plan_id": s.plan_id,
+                "plan_name": s.plan.name, 
                 "status": s.status.value
             }
             for s in subs
@@ -117,7 +121,8 @@ def cancel_subscription(sub_id):
 
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 400
-    
+
+
 @subscriptions_bp.route("/dashboard/stats", methods=["GET"])
 @jwt_required
 def get_dashboard_stats():
@@ -134,7 +139,7 @@ def get_dashboard_stats():
             "success": False,
             "error": str(e)
         }), 500
-    
+
 
 @subscriptions_bp.route("/expiring", methods=["GET"])
 @jwt_required
@@ -149,6 +154,7 @@ def get_expiring_subscriptions():
                     "id": s.id,
                     "member_id": s.member_id,
                     "plan_id": s.plan_id,
+                    "plan_name": s.plan.name,
                     "end_date": s.end_date,
                     "status": s.status.value
                 }
