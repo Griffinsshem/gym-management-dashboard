@@ -50,6 +50,7 @@ def get_subscriptions():
             {
                 "id": s.id,
                 "member_id": s.member_id,
+                "member_name": s.member.full_name,
                 "plan_id": s.plan_id,
                 "plan_name": s.plan.name, 
                 "status": s.status.value,
