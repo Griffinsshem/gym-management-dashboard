@@ -100,33 +100,44 @@ export default function MembersPage() {
     <div className="flex">
       <Sidebar />
 
-      <div className="flex-1 bg-gray-50 min-h-screen">
+      <div className="flex-1 bg-gray-100 min-h-screen">
         <Navbar />
 
-        <div className="p-6">
-          <div className="flex justify-between mb-4">
-            <h1 className="text-xl font-bold text-gray-800">
-              Members
-            </h1>
+        <div className="p-6 max-w-7xl mx-auto space-y-6">
+          {/* ===== Header ===== */}
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl font-semibold text-gray-900">
+                Members
+              </h1>
+              <p className="text-sm text-gray-500">
+                Manage gym members and their subscriptions
+              </p>
+            </div>
 
             <button
               onClick={() => setShowAdd(true)}
-              className="bg-green-600 text-white px-4 py-2 rounded"
+              className="px-4 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg shadow hover:bg-green-700 transition"
             >
-              Add Member
+              + Add Member
             </button>
           </div>
 
-          {loading ? (
-            <p className="text-gray-500">Loading...</p>
-          ) : (
-            <MembersTable
-              data={members}
-              subscriptions={subscriptionsByMember}
-              onEdit={(m) => setEditing(m)}
-              onAssign={(m) => setAssigning(m)}
-            />
-          )}
+          {/* ===== Table ===== */}
+          <div>
+            {loading ? (
+              <div className="bg-white rounded-xl shadow p-6 text-center text-gray-400 text-sm">
+                Loading members...
+              </div>
+            ) : (
+              <MembersTable
+                data={members}
+                subscriptions={subscriptionsByMember}
+                onEdit={(m) => setEditing(m)}
+                onAssign={(m) => setAssigning(m)}
+              />
+            )}
+          </div>
         </div>
       </div>
 
