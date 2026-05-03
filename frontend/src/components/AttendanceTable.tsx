@@ -3,29 +3,71 @@ type Props = {
 };
 
 export default function AttendanceTable({ data }: Props) {
-  return (
-    <div className="bg-white rounded-2xl shadow-sm border p-6 mt-8">
-      <h3 className="text-lg font-semibold mb-4 text-gray-900">Attendance</h3>
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleString();
+  };
 
+  if (!data.length) {
+    return (
+      <div className="bg-white rounded-xl shadow p-6 text-center text-gray-400 text-sm">
+        No attendance records yet
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-xl shadow overflow-hidden">
       <table className="w-full text-sm">
-        <thead>
-          <tr className="text-gray-500 border-b">
-            <th className="py-2 text-left">ID</th>
-            <th className="py-2 text-left">Check In</th>
-            <th className="py-2 text-left">Check Out</th>
+        <thead className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
+          <tr>
+            <th className="p-4 text-left">Session</th>
+            <th className="p-4 text-left">Check In</th>
+            <th className="p-4 text-left">Check Out</th>
+            <th className="p-4 text-left">Status</th>
           </tr>
         </thead>
 
-        <tbody>
-          {data.map((item) => (
-            <tr key={item.id} className="border-b hover:bg-gray-50">
-              <td className="py-3 text-gray-900">{item.id}</td>
-              <td className="text-gray-900">{item.check_in_time}</td>
-              <td className="text-gray-900">
-                {item.check_out_time || "Active"}
-              </td>
-            </tr>
-          ))}
+        <tbody className="text-gray-700">
+          {data.map((item) => {
+            const isActive = !item.check_out_time;
+
+            return (
+              <tr
+                key={item.id}
+                className="border-t hover:bg-gray-50 transition"
+              >
+                {/* Session */}
+                <td className="p-4 font-medium text-gray-900">
+                  #{item.id}
+                </td>
+
+                {/* Check In */}
+                <td className="p-4">
+                  {formatDate(item.check_in_time)}
+                </td>
+
+                {/* Check Out */}
+                <td className="p-4">
+                  {item.check_out_time
+                    ? formatDate(item.check_out_time)
+                    : "-"}
+                </td>
+
+                {/* Status */}
+                <td className="p-4">
+                  <span
+                    className={`px-2 py-1 text-xs rounded-full font-medium
+                    ${isActive
+                        ? "bg-green-100 text-green-700"
+                        : "bg-gray-100 text-gray-600"
+                      }`}
+                  >
+                    {isActive ? "Active" : "Completed"}
+                  </span>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
