@@ -39,15 +39,21 @@ export default function Sidebar() {
   ];
 
   return (
-    <div className="w-64 h-screen bg-white border-r flex flex-col justify-between p-4">
-      {/* Logo */}
+    <div className="w-64 h-screen bg-gray-900 text-gray-200 flex flex-col justify-between p-5">
+      {/* Top Section */}
       <div>
-        <h1 className="text-2xl font-semibold text-gray-800 mb-8">
-          Gym<span className="text-blue-600">Pro</span>
-        </h1>
+        {/* Logo */}
+        <div className="mb-10">
+          <h1 className="text-2xl font-bold tracking-tight">
+            Gym<span className="text-blue-500">Pro</span>
+          </h1>
+          <p className="text-xs text-gray-400 mt-1">
+            Management Dashboard
+          </p>
+        </div>
 
-        {/* Nav */}
-        <nav className="space-y-2">
+        {/* Navigation */}
+        <nav className="space-y-1">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
 
@@ -55,28 +61,43 @@ export default function Sidebar() {
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center gap-3 p-2 rounded-lg transition
+                className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all
                   ${isActive
-                    ? "bg-blue-50 text-blue-600"
-                    : "text-gray-600 hover:bg-gray-100"
-                  }`}
+                    ? "bg-blue-600 text-white shadow"
+                    : "text-gray-400 hover:bg-gray-800 hover:text-white"
+                  }
+                `}
               >
-                <item.icon size={18} />
-                <span className="font-medium">{item.name}</span>
+                <item.icon
+                  size={18}
+                  className={`transition ${isActive
+                      ? "text-white"
+                      : "text-gray-500 group-hover:text-white"
+                    }`}
+                />
+
+                {item.name}
+
+                {/* Active Indicator */}
+                {isActive && (
+                  <span className="ml-auto w-1.5 h-1.5 bg-white rounded-full" />
+                )}
               </Link>
             );
           })}
         </nav>
       </div>
 
-      {/* Logout */}
-      <button
-        onClick={logout}
-        className="flex items-center gap-2 text-gray-600 hover:text-red-500 transition"
-      >
-        <LogOut size={18} />
-        Logout
-      </button>
+      {/* Bottom Section */}
+      <div className="border-t border-gray-800 pt-4">
+        <button
+          onClick={logout}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition"
+        >
+          <LogOut size={18} />
+          Logout
+        </button>
+      </div>
     </div>
   );
 }
