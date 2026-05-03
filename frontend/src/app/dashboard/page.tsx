@@ -16,7 +16,6 @@ export default function Dashboard() {
   const { user } = useAuth();
 
   const [data, setData] = useState<any[]>([]);
-  const [allAttendance, setAllAttendance] = useState<any[]>([]);
   const [membersCount, setMembersCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [checkingIn, setCheckingIn] = useState(false);
@@ -33,43 +32,16 @@ export default function Dashboard() {
 
   const memberId = user?.member_id || null;
 
-  // ================= FETCH =================
 
   const fetchAttendance = async (id: number) => {
     try {
       setLoading(true);
       const res = await apiClient.get(`/attendance/member/${id}`);
       setData(res.data.data);
-    } catch (err: any) {
-      if (err.response?.status === 404) {
-        setData([]);
-      } else {
-        toast.error("Failed to fetch attendance");
-      }
+    } catch {
+      setData([]);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchAllAttendance = async () => {
-    try {
-      const res = await apiClient.get("/members");
-      const members = res.data.data;
-
-      setMembersCount(members.length);
-
-      let all: any[] = [];
-
-      for (const m of members) {
-        try {
-          const r = await apiClient.get(`/attendance/member/${m.id}`);
-          all = [...all, ...(r.data.data || [])];
-        } catch { }
-      }
-
-      setAllAttendance(all);
-    } catch {
-      toast.error("Failed to load global stats");
     }
   };
 
@@ -78,7 +50,7 @@ export default function Dashboard() {
       const res = await apiClient.get("/subscriptions/dashboard/stats");
       setStats(res.data.data);
     } catch {
-      toast.error("Failed to load dashboard stats");
+      toast.error("Failed to load stats");
     }
   };
 
@@ -95,27 +67,22 @@ export default function Dashboard() {
     if (!memberId) return;
 
     fetchAttendance(memberId);
-    fetchAllAttendance();
     fetchDashboardStats();
     fetchExpiring();
   }, [memberId]);
 
-  // ================= ACTIONS =================
 
   const handleCheckIn = async () => {
-    if (!memberId) return toast.error("User not loaded");
+    if (!memberId) return;
 
     try {
       setCheckingIn(true);
-
       await apiClient.post(`/attendance/check-in`, {
         member_id: memberId,
       });
 
-      toast.success("Checked in successfully");
-
+      toast.success("Checked in");
       fetchAttendance(memberId);
-      fetchAllAttendance();
       fetchDashboardStats();
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Check-in failed");
@@ -125,19 +92,16 @@ export default function Dashboard() {
   };
 
   const handleCheckOut = async () => {
-    if (!memberId) return toast.error("User not loaded");
+    if (!memberId) return;
 
     try {
       setCheckingOut(true);
-
       await apiClient.post(`/attendance/check-out`, {
         member_id: memberId,
       });
 
-      toast.success("Checked out successfully");
-
+      toast.success("Checked out");
       fetchAttendance(memberId);
-      fetchAllAttendance();
       fetchDashboardStats();
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Check-out failed");
@@ -146,46 +110,21 @@ export default function Dashboard() {
     }
   };
 
-  // ================= RENEW FLOW =================
-
-  const handleOpenRenew = (sub: any) => {
-    setSelectedMember({
-      id: sub.member_id,
-      full_name: `Member #${sub.member_id}`,
-    });
-    setOpenRenewModal(true);
-  };
-
-  const handleAssignPlan = async (planId: number) => {
-    try {
-      // Assign already happens inside modal (assignPlan)
-      toast.success("Subscription renewed");
-
-      // Refresh dashboard
-      fetchDashboardStats();
-      fetchExpiring();
-    } catch {
-      toast.error("Failed to renew subscription");
-    }
-  };
-
-  // ================= UI =================
-
   const hasActiveSession = data.some((r) => r.check_out_time === null);
 
   return (
     <div className="flex">
       <Sidebar />
 
-      <div className="flex-1 bg-gray-50 min-h-screen">
+      <div className="flex-1 bg-gray-100 min-h-screen">
         <Navbar />
 
-        <div className="p-6 max-w-7xl mx-auto">
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-4">
+        <div className="p-6 max-w-7xl mx-auto space-y-6">
+          {/* ===== Stats ===== */}
+          <div className="grid md:grid-cols-3 gap-6">
             <StatsCard
-              title="Revenue (KES)"
-              value={stats.total_revenue.toString()}
+              title="Total Revenue"
+              value={`KES ${stats.total_revenue}`}
               icon={<ClipboardList />}
             />
 
@@ -202,15 +141,15 @@ export default function Dashboard() {
             />
           </div>
 
-          {/* Buttons */}
-          <div className="mt-6 flex gap-4">
+          {/* ===== Actions ===== */}
+          <div className="flex gap-4">
             <button
               onClick={handleCheckIn}
               disabled={!memberId || hasActiveSession || checkingIn}
-              className={`flex items-center gap-2 px-5 py-2 rounded-lg text-white
-              ${!memberId || hasActiveSession || checkingIn
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium text-white transition
+              ${!memberId || hasActiveSession
                   ? "bg-gray-400"
-                  : "bg-green-600 hover:bg-green-700"
+                  : "bg-green-600 hover:bg-green-700 shadow"
                 }`}
             >
               {checkingIn && <Loader2 className="animate-spin w-4 h-4" />}
@@ -220,10 +159,10 @@ export default function Dashboard() {
             <button
               onClick={handleCheckOut}
               disabled={!memberId || !hasActiveSession || checkingOut}
-              className={`flex items-center gap-2 px-5 py-2 rounded-lg text-white
-              ${!memberId || !hasActiveSession || checkingOut
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium text-white transition
+              ${!memberId || !hasActiveSession
                   ? "bg-gray-400"
-                  : "bg-red-600 hover:bg-red-700"
+                  : "bg-red-600 hover:bg-red-700 shadow"
                 }`}
             >
               {checkingOut && <Loader2 className="animate-spin w-4 h-4" />}
@@ -231,57 +170,68 @@ export default function Dashboard() {
             </button>
           </div>
 
-          {/* Attendance */}
-          <div className="mt-6">
+          {/* ===== Attendance Table ===== */}
+          <div className="bg-white rounded-xl shadow p-5">
+            <h3 className="text-sm font-semibold text-gray-700 mb-4">
+              Recent Attendance
+            </h3>
+
             {loading ? (
-              <div className="animate-pulse space-y-4">
-                <div className="h-6 bg-gray-200 rounded w-1/4"></div>
-                <div className="h-10 bg-gray-200 rounded"></div>
-                <div className="h-10 bg-gray-200 rounded"></div>
-              </div>
+              <p className="text-gray-400 text-sm">Loading...</p>
             ) : (
               <AttendanceTable data={data} />
             )}
           </div>
 
-          <div className="mt-6">
+          {/* ===== Chart ===== */}
+          <div className="bg-white rounded-xl shadow p-5">
+            <h3 className="text-sm font-semibold text-gray-700 mb-4">
+              Attendance Overview
+            </h3>
             <AttendanceChart data={data} />
           </div>
 
-          {/* Expiring */}
-          <div className="mt-8 bg-white p-4 rounded-xl shadow">
-            <h2 className="text-lg font-semibold mb-3 text-gray-800">
-              Expiring Soon
-            </h2>
+          {/* ===== Expiring ===== */}
+          <div className="bg-white rounded-xl shadow p-5">
+            <h3 className="text-sm font-semibold text-gray-700 mb-4">
+              Expiring Subscriptions
+            </h3>
 
             {expiringSubs.length === 0 ? (
-              <p className="text-gray-500 text-sm">
+              <p className="text-gray-400 text-sm">
                 No subscriptions expiring soon
               </p>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {expiringSubs.map((sub) => (
                   <div
                     key={sub.id}
-                    className="flex justify-between items-center border p-2 rounded"
+                    className="flex justify-between items-center p-3 rounded-lg border hover:bg-gray-50 transition"
                   >
-                    <span className="text-sm text-gray-800">
-                      Member #{sub.member_id}
-                    </span>
-
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm text-red-500">
+                    <div>
+                      <p className="text-sm font-medium text-gray-800">
+                        {sub.member_name || `Member #${sub.member_id}`}
+                      </p>
+                      <p className="text-xs text-gray-500">
                         Ends:{" "}
                         {new Date(sub.end_date).toLocaleDateString()}
-                      </span>
-
-                      <button
-                        onClick={() => handleOpenRenew(sub)}
-                        className="bg-blue-600 text-white px-3 py-1 rounded text-xs"
-                      >
-                        Renew
-                      </button>
+                      </p>
                     </div>
+
+                    <button
+                      onClick={() => {
+                        setSelectedMember({
+                          id: sub.member_id,
+                          full_name:
+                            sub.member_name ||
+                            `Member #${sub.member_id}`,
+                        });
+                        setOpenRenewModal(true);
+                      }}
+                      className="px-3 py-1.5 text-xs font-medium bg-blue-600 text-white rounded hover:bg-blue-700"
+                    >
+                      Renew
+                    </button>
                   </div>
                 ))}
               </div>
@@ -295,7 +245,11 @@ export default function Dashboard() {
         <AssignPlanModal
           member={selectedMember}
           onClose={() => setOpenRenewModal(false)}
-          onAssign={handleAssignPlan}
+          onAssign={async () => {
+            toast.success("Subscription renewed");
+            fetchDashboardStats();
+            fetchExpiring();
+          }}
         />
       )}
     </div>
