@@ -41,8 +41,8 @@ class SubscriptionService:
             "plan_id": sub.plan_id,
             "plan_name": sub.plan.name if sub.plan else None,
             "status": sub.status.value,
-            "start_date": sub.start_date,
-            "end_date": sub.end_date
+            "start_date": sub.start_date.isoformat() if sub.start_date else None,
+            "end_date": sub.end_date.isoformat() if sub.end_date else None
         }
 
     def get_subscriptions(self):
