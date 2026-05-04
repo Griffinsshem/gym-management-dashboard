@@ -8,6 +8,7 @@ import CreatePlanModal from "@/components/CreatePlanModal";
 import { useAuth } from "@/context/AuthContext";
 import { getPlans } from "@/lib/subscription";
 import toast from "react-hot-toast";
+import { Loader2, Plus } from "lucide-react";
 
 export default function PlansPage() {
   const [plans, setPlans] = useState<any[]>([]);
@@ -22,7 +23,7 @@ export default function PlansPage() {
       setLoading(true);
       const data = await getPlans();
       setPlans(data);
-    } catch (err: any) {
+    } catch {
       toast.error("Failed to load plans");
     } finally {
       setLoading(false);
@@ -41,11 +42,16 @@ export default function PlansPage() {
         <Navbar />
 
         <div className="p-6 max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-800">
-              Membership Plans
-            </h1>
+          {/* ================= HEADER ================= */}
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Membership Plans
+              </h1>
+              <p className="text-gray-500 text-sm mt-1">
+                Manage your gym subscription plans
+              </p>
+            </div>
 
             {isAdmin && (
               <button
@@ -53,26 +59,43 @@ export default function PlansPage() {
                   setSelectedPlan(null);
                   setOpen(true);
                 }}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+                className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg shadow hover:bg-blue-700 transition"
               >
-                + Create Plan
+                <Plus size={18} />
+                Create Plan
               </button>
             )}
           </div>
 
-          {/* Loading State */}
+          {/* ================= LOADING ================= */}
           {loading ? (
-            <div className="text-center py-10 text-gray-500">
+            <div className="flex justify-center items-center py-20 text-gray-500">
+              <Loader2 className="animate-spin w-6 h-6 mr-2" />
               Loading plans...
             </div>
           ) : plans.length === 0 ? (
-            <div className="text-center text-gray-500 py-10">
-              <p className="text-lg font-medium">No plans yet</p>
-              <p className="text-sm">Create your first membership plan</p>
+            /* ================= EMPTY ================= */
+            <div className="bg-white rounded-xl shadow p-10 text-center">
+              <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                No plans yet
+              </h2>
+              <p className="text-gray-500 text-sm mb-4">
+                Create your first membership plan to get started
+              </p>
+
+              {isAdmin && (
+                <button
+                  onClick={() => setOpen(true)}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+                >
+                  Create Plan
+                </button>
+              )}
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-4">
-              {plans.map((plan, index) => (
+            /* ================= GRID ================= */
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {plans.map((plan) => (
                 <PlanCard
                   key={plan.id}
                   plan={plan}
@@ -80,13 +103,15 @@ export default function PlansPage() {
                   onEdit={(plan) => {
                     setSelectedPlan(plan);
                     setOpen(true);
-                  }} />
+                  }}
+                />
               ))}
             </div>
           )}
         </div>
       </div>
 
+      {/* ================= MODAL ================= */}
       {isAdmin && (
         <CreatePlanModal
           open={open}
