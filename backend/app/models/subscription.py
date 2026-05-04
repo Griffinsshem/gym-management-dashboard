@@ -20,11 +20,22 @@ class MembershipSubscription(db.Model, TimestampMixin):
     start_date = db.Column(db.DateTime, nullable=False)
     end_date = db.Column(db.DateTime, nullable=False)
 
-    status = db.Column(db.Enum(SubscriptionStatus), default=SubscriptionStatus.active)
+    status = db.Column(
+        db.Enum(SubscriptionStatus, native_enum=False),
+        default=SubscriptionStatus.active,
+        nullable=False
+    )
+
     payment_reference = db.Column(db.String(120))
 
     plan = db.relationship(
         "MembershipPlan",
-        back_populates="subscriptions"
+        back_populates="subscriptions",
+        lazy="joined"
     )
-    member = db.relationship("Member", back_populates="subscriptions")
+
+    member = db.relationship(
+        "Member",
+        back_populates="subscriptions",
+        lazy="joined"
+    )
