@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app.services.subscription_service import SubscriptionService
-from app.utils.decorators import jwt_required, require_role
+from app.utils.decorators import jwt_required, require_role, require_self_or_admin
 
 subscriptions_bp = Blueprint("subscriptions", __name__, url_prefix="/api/v1/subscriptions")
 
@@ -19,7 +19,6 @@ def create_subscription():
             plan_id=data.get("plan_id")
         )
 
-        # use service formatter
         formatted = subscription_service._format_subscription(sub)
 
         return jsonify({
@@ -38,6 +37,7 @@ def create_subscription():
 
 @subscriptions_bp.route("", methods=["GET"])
 @jwt_required
+@require_role("admin", "staff")
 def get_subscriptions():
     subs = subscription_service.get_subscriptions()
 
@@ -49,6 +49,7 @@ def get_subscriptions():
 
 @subscriptions_bp.route("/<int:sub_id>", methods=["GET"])
 @jwt_required
+@require_role("admin", "staff")
 def get_subscription(sub_id):
     try:
         sub = subscription_service.get_subscription(sub_id)
@@ -67,6 +68,7 @@ def get_subscription(sub_id):
 
 @subscriptions_bp.route("/member/<int:member_id>", methods=["GET"])
 @jwt_required
+@require_self_or_admin("member_id")
 def get_member_subscriptions(member_id):
     subs = subscription_service.get_member_subscriptions(member_id)
 
@@ -98,6 +100,7 @@ def cancel_subscription(sub_id):
 
 @subscriptions_bp.route("/dashboard/stats", methods=["GET"])
 @jwt_required
+@require_role("admin", "staff")
 def get_dashboard_stats():
     try:
         stats = subscription_service.get_dashboard_stats()
@@ -116,6 +119,7 @@ def get_dashboard_stats():
 
 @subscriptions_bp.route("/expiring", methods=["GET"])
 @jwt_required
+@require_role("admin", "staff")
 def get_expiring_subscriptions():
     try:
         subs = subscription_service.get_expiring_soon()

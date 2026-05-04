@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app.services.member_service import MemberService
-from app.utils.decorators import jwt_required, require_role
+from app.utils.decorators import jwt_required, require_role, require_self_or_admin
 
 member_bp = Blueprint("members", __name__, url_prefix="/api/v1/members")
 member_service = MemberService()
@@ -39,6 +39,7 @@ def create_member():
 
 @member_bp.route("", methods=["GET"])
 @jwt_required
+@require_role("admin", "staff")
 def list_members():
     members = member_service.get_members()
 
@@ -50,6 +51,7 @@ def list_members():
 
 @member_bp.route("/<int:id>", methods=["GET"])
 @jwt_required
+@require_self_or_admin("id")
 def get_member(id):
     try:
         member = member_service.get_member(id)

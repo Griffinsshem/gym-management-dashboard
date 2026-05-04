@@ -10,6 +10,8 @@ def generate_access_token(user):
         "user_id": user.id,
         "email": user.email,
         "role": user.role.value if hasattr(user.role, "value") else str(user.role),
+        "member_id": user.member_id,
+
         "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=15)
     }
 
