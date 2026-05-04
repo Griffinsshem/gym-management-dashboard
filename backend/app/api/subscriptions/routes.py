@@ -19,15 +19,12 @@ def create_subscription():
             plan_id=data.get("plan_id")
         )
 
+        # use service formatter
+        formatted = subscription_service._format_subscription(sub)
+
         return jsonify({
             "success": True,
-            "data": {
-                "id": sub.id,
-                "member_id": sub.member_id,
-                "plan_id": sub.plan_id,
-                "plan_name": sub.plan.name,  
-                "status": sub.status.value
-            }
+            "data": formatted
         }), 201
 
     except Exception as e:
@@ -46,19 +43,7 @@ def get_subscriptions():
 
     return jsonify({
         "success": True,
-        "data": [
-            {
-                "id": s.id,
-                "member_id": s.member_id,
-                "member_name": s.member.full_name,
-                "plan_id": s.plan_id,
-                "plan_name": s.plan.name, 
-                "status": s.status.value,
-                "start_date": s.start_date,
-                "end_date": s.end_date
-            }
-            for s in subs
-        ]
+        "data": subs
     })
 
 
@@ -66,23 +51,18 @@ def get_subscriptions():
 @jwt_required
 def get_subscription(sub_id):
     try:
-        s = subscription_service.get_subscription(sub_id)
+        sub = subscription_service.get_subscription(sub_id)
 
         return jsonify({
             "success": True,
-            "data": {
-                "id": s.id,
-                "member_id": s.member_id,
-                "plan_id": s.plan_id,
-                "plan_name": s.plan.name, 
-                "status": s.status.value,
-                "start_date": s.start_date,
-                "end_date": s.end_date
-            }
+            "data": sub
         })
 
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 404
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 404
 
 
 @subscriptions_bp.route("/member/<int:member_id>", methods=["GET"])
@@ -92,15 +72,7 @@ def get_member_subscriptions(member_id):
 
     return jsonify({
         "success": True,
-        "data": [
-            {
-                "id": s.id,
-                "plan_id": s.plan_id,
-                "plan_name": s.plan.name, 
-                "status": s.status.value
-            }
-            for s in subs
-        ]
+        "data": subs
     })
 
 
@@ -109,19 +81,19 @@ def get_member_subscriptions(member_id):
 @require_role("admin")
 def cancel_subscription(sub_id):
     try:
-        s = subscription_service.cancel_subscription(sub_id)
+        sub = subscription_service.cancel_subscription(sub_id)
 
         return jsonify({
             "success": True,
             "message": "Subscription cancelled",
-            "data": {
-                "id": s.id,
-                "status": s.status.value
-            }
+            "data": sub
         })
 
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 400
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 400
 
 
 @subscriptions_bp.route("/dashboard/stats", methods=["GET"])
@@ -150,18 +122,11 @@ def get_expiring_subscriptions():
 
         return jsonify({
             "success": True,
-            "data": [
-                {
-                    "id": s.id,
-                    "member_id": s.member_id,
-                    "plan_id": s.plan_id,
-                    "plan_name": s.plan.name,
-                    "end_date": s.end_date,
-                    "status": s.status.value
-                }
-                for s in subs
-            ]
+            "data": subs
         })
 
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 400
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 400
