@@ -11,6 +11,8 @@ class SubscriptionService:
         self.member_repo = MemberRepository()
         self.plan_repo = MembershipPlanRepository()
 
+    # ================= CREATE =================
+
     def create_subscription(self, member_id, plan_id):
         member = self.member_repo.get_by_id(member_id)
         if not member:
@@ -33,17 +35,21 @@ class SubscriptionService:
 
         return self.subscription_repo.create(subscription)
 
+    # ================= FORMATTER =================
+
     def _format_subscription(self, sub):
         return {
             "id": sub.id,
             "member_id": sub.member_id,
-            "member_name": sub.member.full_name if sub.member else None,
+            "member_name": getattr(sub.member, "full_name", None),
             "plan_id": sub.plan_id,
-            "plan_name": sub.plan.name if sub.plan else None,
-            "status": sub.status.value,
+            "plan_name": getattr(sub.plan, "name", None),
+            "status": sub.status.value if sub.status else None,
             "start_date": sub.start_date.isoformat() if sub.start_date else None,
-            "end_date": sub.end_date.isoformat() if sub.end_date else None
+            "end_date": sub.end_date.isoformat() if sub.end_date else None,
         }
+
+    # ================= GETTERS =================
 
     def get_subscriptions(self):
         subs = self.subscription_repo.get_all()
@@ -60,6 +66,8 @@ class SubscriptionService:
         subs = self.subscription_repo.get_by_member(member_id)
         return [self._format_subscription(s) for s in subs]
 
+    # ================= ACTIONS =================
+
     def cancel_subscription(self, subscription_id):
         subscription = self.subscription_repo.get_by_id(subscription_id)
         if not subscription:
@@ -68,7 +76,9 @@ class SubscriptionService:
         subscription.status = SubscriptionStatus.cancelled
         self.subscription_repo.update(subscription)
 
-        return subscription
+        return self._format_subscription(subscription)
+
+    # ================= DASHBOARD =================
 
     def get_dashboard_stats(self):
         subscriptions = self.subscription_repo.get_all()
