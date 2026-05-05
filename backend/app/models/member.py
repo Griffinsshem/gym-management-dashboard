@@ -21,5 +21,19 @@ class Member(db.Model, TimestampMixin):
     date_of_birth = db.Column(db.Date)
     is_active = db.Column(db.Boolean, default=True)
 
-    subscriptions = db.relationship("MembershipSubscription", back_populates="member", lazy=True)
-    attendances = db.relationship("Attendance", back_populates="member", lazy=True)
+    user = db.relationship(
+        "User",
+        back_populates="member"
+    )
+
+    subscriptions = db.relationship(
+        "MembershipSubscription",
+        back_populates="member",
+        lazy=True
+    )
+
+    attendances = db.relationship(
+        "Attendance",
+        back_populates="member",
+        lazy=True
+    )

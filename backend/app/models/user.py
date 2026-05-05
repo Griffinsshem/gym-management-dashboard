@@ -24,10 +24,9 @@ class User(db.Model, TimestampMixin):
 
     is_active = db.Column(db.Boolean, default=True)
 
-    member_id = db.Column(
-        db.Integer,
-        db.ForeignKey("members.id"),
-        nullable=True
+    
+    member = db.relationship(
+        "Member",
+        back_populates="user",
+        uselist=False
     )
-
-    member = db.relationship("Member", backref="user", uselist=False)
