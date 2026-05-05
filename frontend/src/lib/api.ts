@@ -9,6 +9,7 @@ apiClient.interceptors.request.use((config) => {
     const token = localStorage.getItem("token");
 
     if (token) {
+      config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${token}`;
     }
   }
@@ -20,7 +21,13 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (typeof window !== "undefined") {
-      if (error.response?.status === 401) {
+      const status = error.response?.status;
+
+      const isAuthPage =
+        window.location.pathname === "/login" ||
+        window.location.pathname === "/register";
+
+      if (status === 401 && !isAuthPage) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
 
