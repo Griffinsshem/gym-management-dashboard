@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, g
 from app.services.attendance_service import AttendanceService
 from app.utils.response import success_response, error_response
 from app.utils.decorators import jwt_required, require_self_or_admin
@@ -12,7 +12,7 @@ attendance_service = AttendanceService()
 @jwt_required
 def check_in():
     data = request.get_json()
-    user = request.user
+    user = g.user 
 
     member_id = data.get("member_id")
 
@@ -45,7 +45,7 @@ def check_in():
 @jwt_required
 def check_out():
     data = request.get_json()
-    user = request.user
+    user = g.user
 
     member_id = data.get("member_id")
 

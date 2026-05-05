@@ -3,7 +3,6 @@ from flask import request, jsonify, g
 from app.utils.token import decode_token
 
 
-# ================= JWT REQUIRED =================
 def jwt_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -16,12 +15,7 @@ def jwt_required(f):
             }), 401
 
         try:
-            parts = auth_header.split(" ")
-
-            if len(parts) != 2 or parts[0] != "Bearer":
-                raise ValueError("Invalid token format")
-
-            token = parts[1]
+            token = auth_header.split(" ")[1]
             payload = decode_token(token)
 
             g.user = payload
@@ -37,7 +31,6 @@ def jwt_required(f):
     return decorated
 
 
-# ================= ROLE CHECK =================
 def require_role(*roles):
     def wrapper(f):
         @wraps(f)
@@ -50,9 +43,7 @@ def require_role(*roles):
                     "error": "Unauthorized"
                 }), 401
 
-            user_role = user.get("role")
-
-            if user_role not in roles:
+            if user.get("role") not in roles:
                 return jsonify({
                     "success": False,
                     "error": f"Forbidden: requires role {roles}"
@@ -64,7 +55,6 @@ def require_role(*roles):
     return wrapper
 
 
-# ================= SELF OR ADMIN =================
 def require_self_or_admin(param_name="member_id"):
     def wrapper(f):
         @wraps(f)
@@ -80,30 +70,12 @@ def require_self_or_admin(param_name="member_id"):
             if user.get("role") in ["admin", "staff"]:
                 return f(*args, **kwargs)
 
-            requested_id = (
-                kwargs.get(param_name) or
-                request.args.get(param_name) or
-                (request.json.get(param_name) if request.is_json else None)
-            )
+            requested_id = kwargs.get(param_name)
 
-            if not requested_id:
+            if not requested_id or user.get("member_id") != requested_id:
                 return jsonify({
                     "success": False,
-                    "error": "Missing member_id"
-                }), 400
-
-            try:
-                requested_id = int(requested_id)
-            except:
-                return jsonify({
-                    "success": False,
-                    "error": "Invalid member_id"
-                }), 400
-
-            if user.get("member_id") != requested_id:
-                return jsonify({
-                    "success": False,
-                    "error": "Forbidden: Access denied"
+                    "error": "Forbidden"
                 }), 403
 
             return f(*args, **kwargs)
