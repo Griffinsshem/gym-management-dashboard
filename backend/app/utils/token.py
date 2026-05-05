@@ -5,15 +5,19 @@ import os
 SECRET_KEY = os.getenv("SECRET_KEY", "super-secret")
 
 
-def generate_access_token(user):
+def generate_access_token(user, member_id=None):
+    now = datetime.datetime.utcnow()
+
     payload = {
         "user_id": user.id,
         "email": user.email,
+
         "role": user.role.value if hasattr(user.role, "value") else str(user.role),
 
-        "member_id": user.member.id if user.member else None,
+        "member_id": member_id,
 
-        "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=15)
+        "iat": now,
+        "exp": now + datetime.timedelta(hours=8)
     }
 
     token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
@@ -28,7 +32,9 @@ def decode_token(token):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
         return payload
+
     except jwt.ExpiredSignatureError:
         raise ValueError("Token expired")
+
     except jwt.InvalidTokenError:
         raise ValueError("Invalid token")

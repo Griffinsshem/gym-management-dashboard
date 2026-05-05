@@ -19,7 +19,7 @@ import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, isAdmin, isStaff, isMember } = useAuth();
 
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,9 +36,6 @@ export default function Dashboard() {
   });
 
   const memberId = user?.member_id;
-
-  const isPrivileged =
-    user?.role === "admin" || user?.role === "staff";
 
   // ================= FETCH =================
 
@@ -77,11 +74,11 @@ export default function Dashboard() {
 
     fetchAttendance(memberId);
 
-    if (isPrivileged) {
+    if (isAdmin || isStaff) {
       fetchDashboardStats();
       fetchExpiring();
     }
-  }, [memberId, user]);
+  }, [memberId, isAdmin, isStaff]);
 
   // ================= ACTIONS =================
 
@@ -98,9 +95,7 @@ export default function Dashboard() {
       toast.success("Checked in");
       fetchAttendance(memberId);
 
-      if (isPrivileged) {
-        fetchDashboardStats();
-      }
+      if (isAdmin || isStaff) fetchDashboardStats();
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Check-in failed");
     } finally {
@@ -121,9 +116,7 @@ export default function Dashboard() {
       toast.success("Checked out");
       fetchAttendance(memberId);
 
-      if (isPrivileged) {
-        fetchDashboardStats();
-      }
+      if (isAdmin || isStaff) fetchDashboardStats();
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Check-out failed");
     } finally {
@@ -152,8 +145,8 @@ export default function Dashboard() {
             </p>
           </div>
 
-          {/* ===== STATS (ADMIN / STAFF ONLY) ===== */}
-          {isPrivileged && (
+          {/* ===== STATS (ADMIN + STAFF ONLY) ===== */}
+          {(isAdmin || isStaff) && (
             <div className="grid md:grid-cols-3 gap-6">
               <StatsCard
                 title="Total Revenue"
@@ -173,7 +166,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* ===== QUICK ACTIONS ===== */}
+          {/* ===== QUICK ACTIONS (ALL USERS) ===== */}
           <div className="bg-white rounded-xl shadow p-5 flex gap-4">
             <button
               onClick={handleCheckIn}
@@ -205,7 +198,7 @@ export default function Dashboard() {
           {/* ===== MAIN GRID ===== */}
           <div className="grid md:grid-cols-3 gap-6">
 
-            {/* TABLE */}
+            {/* LEFT */}
             <div className="md:col-span-2 bg-white rounded-xl shadow p-5">
               <h3 className="text-sm font-semibold text-gray-700 mb-4">
                 Recent Attendance
@@ -218,8 +211,8 @@ export default function Dashboard() {
               )}
             </div>
 
-            {/* EXPIRING (ADMIN / STAFF ONLY) */}
-            {isPrivileged && (
+            {/* RIGHT (ONLY ADMIN + STAFF) */}
+            {(isAdmin || isStaff) && (
               <div className="bg-white rounded-xl shadow p-5">
                 <h3 className="text-sm font-bold text-gray-900 mb-4">
                   Expiring Soon
@@ -238,31 +231,31 @@ export default function Dashboard() {
                       >
                         <div>
                           <p className="text-sm font-medium">
-                            {sub.member_name ||
-                              `Member #${sub.member_id}`}
+                            {sub.member_name || `Member #${sub.member_id}`}
                           </p>
                           <p className="text-xs text-red-500">
                             Ends:{" "}
-                            {new Date(
-                              sub.end_date
-                            ).toLocaleDateString()}
+                            {new Date(sub.end_date).toLocaleDateString()}
                           </p>
                         </div>
 
-                        <button
-                          onClick={() => {
-                            setSelectedMember({
-                              id: sub.member_id,
-                              full_name:
-                                sub.member_name ||
-                                `Member #${sub.member_id}`,
-                            });
-                            setOpenRenewModal(true);
-                          }}
-                          className="text-xs px-3 py-1 bg-blue-600 text-white rounded"
-                        >
-                          Renew
-                        </button>
+                        {/* ONLY ADMIN CAN RENEW */}
+                        {isAdmin && (
+                          <button
+                            onClick={() => {
+                              setSelectedMember({
+                                id: sub.member_id,
+                                full_name:
+                                  sub.member_name ||
+                                  `Member #${sub.member_id}`,
+                              });
+                              setOpenRenewModal(true);
+                            }}
+                            className="text-xs px-3 py-1 bg-blue-600 text-white rounded"
+                          >
+                            Renew
+                          </button>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -271,7 +264,7 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* ===== CHART ===== */}
+          {/* ===== CHART (ALL USERS) ===== */}
           <div className="bg-white rounded-xl shadow p-5">
             <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
               <TrendingUp size={16} /> Attendance Trends
@@ -282,18 +275,15 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* MODAL */}
-      {openRenewModal && selectedMember && (
+      {/* MODAL (ADMIN ONLY) */}
+      {isAdmin && openRenewModal && selectedMember && (
         <AssignPlanModal
           member={selectedMember}
           onClose={() => setOpenRenewModal(false)}
           onAssign={async () => {
             toast.success("Subscription renewed");
-
-            if (isPrivileged) {
-              fetchDashboardStats();
-              fetchExpiring();
-            }
+            fetchDashboardStats();
+            fetchExpiring();
           }}
         />
       )}

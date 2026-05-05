@@ -5,6 +5,8 @@ from app.utils.response import success_response, error_response
 auth_bp = Blueprint("auth", __name__, url_prefix="/api/v1/auth")
 auth_service = AuthService()
 
+
+# ================= REGISTER =================
 @auth_bp.route("/register", methods=["POST"])
 def register():
     data = request.get_json()
@@ -18,7 +20,6 @@ def register():
             password=data.get("password")
         )
 
-
         return success_response(
             data={
                 "id": user.id,
@@ -30,9 +31,14 @@ def register():
     except ValueError as e:
         return error_response(str(e), "REGISTER_ERROR", 400)
 
-    except Exception:
+    except Exception as e:
+        print("REGISTER ERROR:", str(e))
+        import traceback
+        traceback.print_exc()
         return error_response("Internal server error", "SERVER_ERROR", 500)
 
+
+# ================= LOGIN =================
 @auth_bp.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
@@ -46,11 +52,15 @@ def login():
             password=data.get("password")
         )
 
+        user = result["user"]
+
         return success_response(
             data={
-                "id": result["user"].id,
-                "email": result["user"].email,
-                "role": result["user"].role.value,
+                "id": user.id,
+                "email": user.email,
+
+                "role": user.role.value if hasattr(user.role, "value") else user.role,
+
                 "access_token": result["access_token"],
                 "member_id": result["member_id"]
             },
@@ -60,9 +70,8 @@ def login():
     except ValueError as e:
         return error_response(str(e), "AUTH_ERROR", 401)
 
-    
     except Exception as e:
-        print("REGISTER ERROR:", str(e))  
+        print("LOGIN ERROR:", str(e))
         import traceback
-        traceback.print_exc()      
-        return error_response(str(e), "SERVER_ERROR", 500)
+        traceback.print_exc()
+        return error_response("Internal server error", "SERVER_ERROR", 500)

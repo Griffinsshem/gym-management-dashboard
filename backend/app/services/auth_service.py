@@ -59,7 +59,7 @@ class AuthService:
         if not member:
             raise ValueError("User is not linked to a member profile")
         
-        access_token = generate_access_token(user)
+        access_token = generate_access_token(user, member.id)
 
         return {
             "user": user,

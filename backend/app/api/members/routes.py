@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, g
 from app.services.member_service import MemberService
 from app.utils.decorators import jwt_required, require_role, require_self_or_admin
 
@@ -6,6 +6,7 @@ member_bp = Blueprint("members", __name__, url_prefix="/api/v1/members")
 member_service = MemberService()
 
 
+# ================= CREATE MEMBER =================
 @member_bp.route("", methods=["POST"])
 @jwt_required
 @require_role("admin")
@@ -13,10 +14,10 @@ def create_member():
     data = request.get_json()
 
     try:
-        current_user = request.user 
+        current_user = g.user 
 
         member = member_service.create_member(
-            user_id=current_user["user_id"], 
+            user_id=current_user["user_id"],
             full_name=data.get("full_name"),
             phone=data.get("phone"),
             email=data.get("email"),
@@ -34,9 +35,13 @@ def create_member():
         }), 201
 
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 400
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 400
 
 
+# ================= LIST MEMBERS =================
 @member_bp.route("", methods=["GET"])
 @jwt_required
 @require_role("admin", "staff")
@@ -49,6 +54,7 @@ def list_members():
     })
 
 
+# ================= GET MEMBER =================
 @member_bp.route("/<int:id>", methods=["GET"])
 @jwt_required
 @require_self_or_admin("id")
@@ -66,9 +72,13 @@ def get_member(id):
         })
 
     except ValueError as e:
-        return jsonify({"success": False, "error": str(e)}), 404
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 404
 
 
+# ================= UPDATE MEMBER =================
 @member_bp.route("/<int:id>", methods=["PATCH"])
 @jwt_required
 @require_role("admin")
@@ -87,9 +97,13 @@ def update_member(id):
         })
 
     except ValueError as e:
-        return jsonify({"success": False, "error": str(e)}), 404
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 404
 
 
+# ================= DELETE MEMBER =================
 @member_bp.route("/<int:id>", methods=["DELETE"])
 @jwt_required
 @require_role("admin")
@@ -103,4 +117,7 @@ def delete_member(id):
         })
 
     except ValueError as e:
-        return jsonify({"success": False, "error": str(e)}), 404
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 404

@@ -7,11 +7,18 @@ subscriptions_bp = Blueprint("subscriptions", __name__, url_prefix="/api/v1/subs
 subscription_service = SubscriptionService()
 
 
+# ================= CREATE =================
 @subscriptions_bp.route("", methods=["POST"])
 @jwt_required
 @require_role("admin")
 def create_subscription():
     data = request.get_json()
+
+    if not data or not data.get("member_id") or not data.get("plan_id"):
+        return jsonify({
+            "success": False,
+            "error": "member_id and plan_id are required"
+        }), 400
 
     try:
         sub = subscription_service.create_subscription(
@@ -35,6 +42,7 @@ def create_subscription():
         }), 400
 
 
+# ================= GET ALL =================
 @subscriptions_bp.route("", methods=["GET"])
 @jwt_required
 @require_role("admin", "staff")
@@ -47,6 +55,7 @@ def get_subscriptions():
     })
 
 
+# ================= GET ONE =================
 @subscriptions_bp.route("/<int:sub_id>", methods=["GET"])
 @jwt_required
 @require_role("admin", "staff")
@@ -66,6 +75,7 @@ def get_subscription(sub_id):
         }), 404
 
 
+# ================= MEMBER SUBSCRIPTIONS =================
 @subscriptions_bp.route("/member/<int:member_id>", methods=["GET"])
 @jwt_required
 @require_self_or_admin("member_id")
@@ -78,6 +88,7 @@ def get_member_subscriptions(member_id):
     })
 
 
+# ================= CANCEL =================
 @subscriptions_bp.route("/<int:sub_id>/cancel", methods=["PATCH"])
 @jwt_required
 @require_role("admin")
@@ -98,6 +109,7 @@ def cancel_subscription(sub_id):
         }), 400
 
 
+# ================= DASHBOARD STATS =================
 @subscriptions_bp.route("/dashboard/stats", methods=["GET"])
 @jwt_required
 @require_role("admin", "staff")
@@ -117,6 +129,7 @@ def get_dashboard_stats():
         }), 500
 
 
+# ================= EXPIRING =================
 @subscriptions_bp.route("/expiring", methods=["GET"])
 @jwt_required
 @require_role("admin", "staff")
