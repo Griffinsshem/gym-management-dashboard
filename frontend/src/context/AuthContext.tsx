@@ -17,6 +17,7 @@ type AuthContextType = {
   logout: () => void;
   isAdmin: boolean;
   isStaff: boolean;
+  isMember: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -55,10 +56,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const isAdmin = user?.role === "admin";
   const isStaff = user?.role === "staff";
+  const isMember = user?.role === "member";
 
   return (
     <AuthContext.Provider
-      value={{ user, token, setUser, login, logout, isAdmin, isStaff }}
+      value={{
+        user,
+        token,
+        setUser,
+        login,
+        logout,
+        isAdmin,
+        isStaff,
+        isMember,
+      }}
     >
       {children}
     </AuthContext.Provider>

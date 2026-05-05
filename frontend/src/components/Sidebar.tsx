@@ -12,7 +12,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 
 export default function Sidebar() {
-  const { logout } = useAuth();
+  const { logout, isAdmin, isStaff, isMember } = useAuth();
   const pathname = usePathname();
 
   const navItems = [
@@ -20,29 +20,38 @@ export default function Sidebar() {
       name: "Dashboard",
       href: "/dashboard",
       icon: LayoutDashboard,
+      roles: ["admin", "staff", "member"],
     },
     {
       name: "Members",
       href: "/members",
       icon: Users,
+      roles: ["admin", "staff"],
     },
     {
       name: "Plans",
       href: "/plans",
       icon: ClipboardList,
+      roles: ["admin"],
     },
     {
       name: "Subscriptions",
       href: "/subscriptions",
       icon: CreditCard,
+      roles: ["admin", "staff"],
     },
   ];
 
+  const filteredNav = navItems.filter((item) => {
+    if (isAdmin) return item.roles.includes("admin");
+    if (isStaff) return item.roles.includes("staff");
+    if (isMember) return item.roles.includes("member");
+    return false;
+  });
+
   return (
     <div className="w-64 h-screen bg-gray-900 text-gray-200 flex flex-col justify-between p-5">
-      {/* Top Section */}
       <div>
-        {/* Logo */}
         <div className="mb-10">
           <h1 className="text-2xl font-bold tracking-tight">
             Gym<span className="text-blue-500">Pro</span>
@@ -52,9 +61,8 @@ export default function Sidebar() {
           </p>
         </div>
 
-        {/* Navigation */}
         <nav className="space-y-1">
-          {navItems.map((item) => {
+          {filteredNav.map((item) => {
             const isActive = pathname === item.href;
 
             return (
@@ -68,17 +76,10 @@ export default function Sidebar() {
                   }
                 `}
               >
-                <item.icon
-                  size={18}
-                  className={`transition ${isActive
-                      ? "text-white"
-                      : "text-gray-500 group-hover:text-white"
-                    }`}
-                />
+                <item.icon size={18} />
 
                 {item.name}
 
-                {/* Active Indicator */}
                 {isActive && (
                   <span className="ml-auto w-1.5 h-1.5 bg-white rounded-full" />
                 )}
@@ -88,7 +89,6 @@ export default function Sidebar() {
         </nav>
       </div>
 
-      {/* Bottom Section */}
       <div className="border-t border-gray-800 pt-4">
         <button
           onClick={logout}

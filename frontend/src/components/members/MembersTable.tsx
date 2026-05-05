@@ -17,8 +17,8 @@ export default function MembersTable({
 }: {
   data: Member[];
   subscriptions: SubscriptionMap;
-  onEdit: (member: Member) => void;
-  onAssign: (member: Member) => void;
+  onEdit?: (member: Member) => void;
+  onAssign?: (member: Member) => void;
 }) {
   const getStatusStyle = (status: string) => {
     if (status === "active")
@@ -105,19 +105,26 @@ export default function MembersTable({
                 {/* ACTIONS */}
                 <td className="p-4">
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => onEdit(member)}
-                      className="px-3 py-1 text-xs font-medium bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition"
-                    >
-                      Edit
-                    </button>
 
-                    <button
-                      onClick={() => onAssign(member)}
-                      className="px-3 py-1 text-xs font-medium bg-green-50 text-green-600 rounded-md hover:bg-green-100 transition"
-                    >
-                      Assign
-                    </button>
+                    {/* Only show if handler exists */}
+                    {onEdit && (
+                      <button
+                        onClick={() => onEdit(member)}
+                        className="px-3 py-1 text-xs font-medium bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition"
+                      >
+                        Edit
+                      </button>
+                    )}
+
+                    {onAssign && (
+                      <button
+                        onClick={() => onAssign(member)}
+                        className="px-3 py-1 text-xs font-medium bg-green-50 text-green-600 rounded-md hover:bg-green-100 transition"
+                      >
+                        Assign
+                      </button>
+                    )}
+
                   </div>
                 </td>
               </tr>

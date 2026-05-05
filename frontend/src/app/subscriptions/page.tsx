@@ -5,6 +5,8 @@ import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
 import { apiClient } from "@/lib/api";
 import toast from "react-hot-toast";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 type Subscription = {
   id: number;
@@ -19,6 +21,15 @@ export default function SubscriptionsPage() {
   const [subs, setSubs] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const { isAdmin, isStaff, user } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (user && !isAdmin && !isStaff) {
+      router.push("/dashboard");
+    }
+  }, [user, isAdmin, isStaff, router]);
+
   const loadSubscriptions = async () => {
     try {
       setLoading(true);
@@ -32,8 +43,12 @@ export default function SubscriptionsPage() {
   };
 
   useEffect(() => {
+    // only fetch if authorized
+    if (!user) return;
+    if (!isAdmin && !isStaff) return;
+
     loadSubscriptions();
-  }, []);
+  }, [user, isAdmin, isStaff]);
 
   const getStatusStyle = (status: string) => {
     if (status === "active")
@@ -42,6 +57,10 @@ export default function SubscriptionsPage() {
       return "bg-red-100 text-red-600";
     return "bg-gray-100 text-gray-500";
   };
+
+  if (!user || (!isAdmin && !isStaff)) {
+    return null;
+  }
 
   return (
     <div className="flex">
@@ -103,15 +122,11 @@ export default function SubscriptionsPage() {
                       </td>
 
                       <td className="p-4 text-gray-600">
-                        {new Date(
-                          s.start_date
-                        ).toLocaleDateString()}
+                        {new Date(s.start_date).toLocaleDateString()}
                       </td>
 
                       <td className="p-4 text-gray-600">
-                        {new Date(
-                          s.end_date
-                        ).toLocaleDateString()}
+                        {new Date(s.end_date).toLocaleDateString()}
                       </td>
                     </tr>
                   ))}

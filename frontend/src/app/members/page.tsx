@@ -15,6 +15,8 @@ import {
 import AssignPlanModal from "@/components/subscriptions/AssignPlanModal";
 import { apiClient } from "@/lib/api";
 import { getPlans } from "@/lib/subscription";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 type Subscription = {
@@ -39,6 +41,15 @@ export default function MembersPage() {
   const [assigning, setAssigning] = useState<Member | null>(null);
 
   const [loading, setLoading] = useState(true);
+
+  const { isAdmin, isStaff, user } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (user && !isAdmin && !isStaff) {
+      router.push("/dashboard");
+    }
+  }, [user, isAdmin, isStaff]);
 
   const loadMembers = async () => {
     try {
@@ -68,6 +79,8 @@ export default function MembersPage() {
   };
 
   useEffect(() => {
+    if (!user) return;
+
     const loadAll = async () => {
       setLoading(true);
       await Promise.all([
@@ -79,7 +92,7 @@ export default function MembersPage() {
     };
 
     loadAll();
-  }, []);
+  }, [user]);
 
   const subscriptionsByMember = subscriptions.reduce(
     (acc: any, sub: Subscription) => {
@@ -115,12 +128,15 @@ export default function MembersPage() {
               </p>
             </div>
 
-            <button
-              onClick={() => setShowAdd(true)}
-              className="px-4 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg shadow hover:bg-green-700 transition"
-            >
-              + Add Member
-            </button>
+            {/* ONLY ADMIN CAN ADD */}
+            {isAdmin && (
+              <button
+                onClick={() => setShowAdd(true)}
+                className="px-4 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg shadow hover:bg-green-700 transition"
+              >
+                + Add Member
+              </button>
+            )}
           </div>
 
           {/* ===== Table ===== */}
@@ -133,8 +149,12 @@ export default function MembersPage() {
               <MembersTable
                 data={members}
                 subscriptions={subscriptionsByMember}
-                onEdit={(m) => setEditing(m)}
-                onAssign={(m) => setAssigning(m)}
+                {...(isAdmin
+                  ? {
+                    onEdit: (m) => setEditing(m),
+                    onAssign: (m) => setAssigning(m),
+                  }
+                  : {})}
               />
             )}
           </div>
@@ -142,7 +162,7 @@ export default function MembersPage() {
       </div>
 
       {/* Add Member */}
-      {showAdd && (
+      {isAdmin && showAdd && (
         <AddMemberModal
           onClose={() => setShowAdd(false)}
           onSave={async (data) => {
@@ -161,7 +181,7 @@ export default function MembersPage() {
       )}
 
       {/* Edit Member */}
-      {editing && (
+      {isAdmin && editing && (
         <EditMemberModal
           member={editing}
           onClose={() => setEditing(null)}
@@ -179,7 +199,7 @@ export default function MembersPage() {
       )}
 
       {/* Assign Plan */}
-      {assigning && (
+      {isAdmin && assigning && (
         <AssignPlanModal
           member={assigning}
           onClose={() => setAssigning(null)}

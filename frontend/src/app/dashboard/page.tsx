@@ -37,6 +37,9 @@ export default function Dashboard() {
 
   const memberId = user?.member_id;
 
+  const isPrivileged =
+    user?.role === "admin" || user?.role === "staff";
+
   // ================= FETCH =================
 
   const fetchAttendance = async (id: number) => {
@@ -73,9 +76,12 @@ export default function Dashboard() {
     if (!memberId) return;
 
     fetchAttendance(memberId);
-    fetchDashboardStats();
-    fetchExpiring();
-  }, [memberId]);
+
+    if (isPrivileged) {
+      fetchDashboardStats();
+      fetchExpiring();
+    }
+  }, [memberId, user]);
 
   // ================= ACTIONS =================
 
@@ -91,7 +97,10 @@ export default function Dashboard() {
 
       toast.success("Checked in");
       fetchAttendance(memberId);
-      fetchDashboardStats();
+
+      if (isPrivileged) {
+        fetchDashboardStats();
+      }
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Check-in failed");
     } finally {
@@ -111,7 +120,10 @@ export default function Dashboard() {
 
       toast.success("Checked out");
       fetchAttendance(memberId);
-      fetchDashboardStats();
+
+      if (isPrivileged) {
+        fetchDashboardStats();
+      }
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Check-out failed");
     } finally {
@@ -130,7 +142,7 @@ export default function Dashboard() {
 
         <div className="p-6 max-w-7xl mx-auto space-y-6">
 
-          {/* ===== HERO / GREETING ===== */}
+          {/* ===== HERO ===== */}
           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 rounded-xl shadow">
             <h2 className="text-xl font-semibold">
               Welcome back 👋
@@ -140,26 +152,26 @@ export default function Dashboard() {
             </p>
           </div>
 
-          {/* ===== STATS ===== */}
-          <div className="grid md:grid-cols-3 gap-6">
-            <StatsCard
-              title="Total Revenue"
-              value={`KES ${stats.total_revenue}`}
-              icon={<ClipboardList />}
-            />
-
-            <StatsCard
-              title="Active Subscriptions"
-              value={stats.active_subscriptions.toString()}
-              icon={<Activity />}
-            />
-
-            <StatsCard
-              title="Expiring Soon"
-              value={stats.expiring_soon.toString()}
-              icon={<Users />}
-            />
-          </div>
+          {/* ===== STATS (ADMIN / STAFF ONLY) ===== */}
+          {isPrivileged && (
+            <div className="grid md:grid-cols-3 gap-6">
+              <StatsCard
+                title="Total Revenue"
+                value={`KES ${stats.total_revenue}`}
+                icon={<ClipboardList />}
+              />
+              <StatsCard
+                title="Active Subscriptions"
+                value={stats.active_subscriptions.toString()}
+                icon={<Activity />}
+              />
+              <StatsCard
+                title="Expiring Soon"
+                value={stats.expiring_soon.toString()}
+                icon={<Users />}
+              />
+            </div>
+          )}
 
           {/* ===== QUICK ACTIONS ===== */}
           <div className="bg-white rounded-xl shadow p-5 flex gap-4">
@@ -193,7 +205,7 @@ export default function Dashboard() {
           {/* ===== MAIN GRID ===== */}
           <div className="grid md:grid-cols-3 gap-6">
 
-            {/* LEFT (TABLE) */}
+            {/* TABLE */}
             <div className="md:col-span-2 bg-white rounded-xl shadow p-5">
               <h3 className="text-sm font-semibold text-gray-700 mb-4">
                 Recent Attendance
@@ -206,52 +218,57 @@ export default function Dashboard() {
               )}
             </div>
 
-            {/* RIGHT (EXPIRING) */}
-            <div className="bg-white rounded-xl shadow p-5">
-              <h3 className="text-sm font-semibold text-gray-700 mb-4">
-                Expiring Soon
-              </h3>
+            {/* EXPIRING (ADMIN / STAFF ONLY) */}
+            {isPrivileged && (
+              <div className="bg-white rounded-xl shadow p-5">
+                <h3 className="text-sm font-bold text-gray-900 mb-4">
+                  Expiring Soon
+                </h3>
 
-              {expiringSubs.length === 0 ? (
-                <p className="text-gray-400 text-sm">
-                  No subscriptions expiring soon
-                </p>
-              ) : (
-                <div className="space-y-3">
-                  {expiringSubs.map((sub) => (
-                    <div
-                      key={sub.id}
-                      className="p-3 border rounded-lg flex justify-between items-center hover:bg-gray-50"
-                    >
-                      <div>
-                        <p className="text-sm font-medium">
-                          {sub.member_name || `Member #${sub.member_id}`}
-                        </p>
-                        <p className="text-xs text-red-500">
-                          Ends:{" "}
-                          {new Date(sub.end_date).toLocaleDateString()}
-                        </p>
-                      </div>
-
-                      <button
-                        onClick={() => {
-                          setSelectedMember({
-                            id: sub.member_id,
-                            full_name:
-                              sub.member_name ||
-                              `Member #${sub.member_id}`,
-                          });
-                          setOpenRenewModal(true);
-                        }}
-                        className="text-xs px-3 py-1 bg-blue-600 text-white rounded"
+                {expiringSubs.length === 0 ? (
+                  <p className="text-gray-400 text-sm">
+                    No subscriptions expiring soon
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {expiringSubs.map((sub) => (
+                      <div
+                        key={sub.id}
+                        className="p-3 border rounded-lg flex justify-between items-center hover:bg-gray-50"
                       >
-                        Renew
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                        <div>
+                          <p className="text-sm font-medium">
+                            {sub.member_name ||
+                              `Member #${sub.member_id}`}
+                          </p>
+                          <p className="text-xs text-red-500">
+                            Ends:{" "}
+                            {new Date(
+                              sub.end_date
+                            ).toLocaleDateString()}
+                          </p>
+                        </div>
+
+                        <button
+                          onClick={() => {
+                            setSelectedMember({
+                              id: sub.member_id,
+                              full_name:
+                                sub.member_name ||
+                                `Member #${sub.member_id}`,
+                            });
+                            setOpenRenewModal(true);
+                          }}
+                          className="text-xs px-3 py-1 bg-blue-600 text-white rounded"
+                        >
+                          Renew
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* ===== CHART ===== */}
@@ -272,8 +289,11 @@ export default function Dashboard() {
           onClose={() => setOpenRenewModal(false)}
           onAssign={async () => {
             toast.success("Subscription renewed");
-            fetchDashboardStats();
-            fetchExpiring();
+
+            if (isPrivileged) {
+              fetchDashboardStats();
+              fetchExpiring();
+            }
           }}
         />
       )}
