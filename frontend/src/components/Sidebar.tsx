@@ -12,8 +12,10 @@ import {
 import { useAuth } from "@/context/AuthContext";
 
 export default function Sidebar() {
-  const { logout, isAdmin, isStaff, isMember } = useAuth();
+  const { logout, isAdmin, isStaff, user } = useAuth();
   const pathname = usePathname();
+
+  const isMember = user?.role === "member";
 
   const navItems = [
     {
@@ -42,15 +44,21 @@ export default function Sidebar() {
     },
   ];
 
-  const filteredNav = navItems.filter((item) => {
-    if (isAdmin) return item.roles.includes("admin");
-    if (isStaff) return item.roles.includes("staff");
-    if (isMember) return item.roles.includes("member");
-    return false;
-  });
+  const currentRole = isAdmin
+    ? "admin"
+    : isStaff
+      ? "staff"
+      : isMember
+        ? "member"
+        : null;
+
+  const filteredNav = navItems.filter((item) =>
+    currentRole ? item.roles.includes(currentRole) : false
+  );
 
   return (
     <div className="w-64 h-screen bg-gray-900 text-gray-200 flex flex-col justify-between p-5">
+      {/* TOP */}
       <div>
         <div className="mb-10">
           <h1 className="text-2xl font-bold tracking-tight">
@@ -89,6 +97,7 @@ export default function Sidebar() {
         </nav>
       </div>
 
+      {/* BOTTOM */}
       <div className="border-t border-gray-800 pt-4">
         <button
           onClick={logout}
