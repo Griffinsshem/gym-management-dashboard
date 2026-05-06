@@ -147,7 +147,7 @@ export default function Dashboard() {
 
           {/* ===== STATS (ADMIN + STAFF ONLY) ===== */}
           {(isAdmin || isStaff) && (
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-3 gap-6 text-gray-700">
               <StatsCard
                 title="Total Revenue"
                 value={`KES ${stats.total_revenue}`}
@@ -173,7 +173,7 @@ export default function Dashboard() {
               disabled={!memberId || hasActiveSession || checkingIn}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium text-white transition
               ${!memberId || hasActiveSession
-                  ? "bg-gray-400"
+                  ? "bg-gray-900"
                   : "bg-green-600 hover:bg-green-700 shadow"
                 }`}
             >
@@ -186,7 +186,7 @@ export default function Dashboard() {
               disabled={!memberId || !hasActiveSession || checkingOut}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium text-white transition
               ${!memberId || !hasActiveSession
-                  ? "bg-gray-400"
+                  ? "bg-gray-500"
                   : "bg-red-600 hover:bg-red-700 shadow"
                 }`}
             >
@@ -200,7 +200,7 @@ export default function Dashboard() {
 
             {/* LEFT */}
             <div className="md:col-span-2 bg-white rounded-xl shadow p-5">
-              <h3 className="text-sm font-semibold text-gray-700 mb-4">
+              <h3 className="text-sm font-semibold text-gray-900 mb-4">
                 Recent Attendance
               </h3>
 
@@ -219,7 +219,7 @@ export default function Dashboard() {
                 </h3>
 
                 {expiringSubs.length === 0 ? (
-                  <p className="text-gray-400 text-sm">
+                  <p className="text-gray-500 text-sm">
                     No subscriptions expiring soon
                   </p>
                 ) : (

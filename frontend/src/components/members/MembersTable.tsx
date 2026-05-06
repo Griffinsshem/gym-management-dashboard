@@ -1,6 +1,7 @@
 "use client";
 
 import { Member } from "@/lib/member";
+import { useAuth } from "@/context/AuthContext";
 
 type SubscriptionMap = {
   [memberId: number]: {
@@ -20,6 +21,8 @@ export default function MembersTable({
   onEdit?: (member: Member) => void;
   onAssign?: (member: Member) => void;
 }) {
+  const { searchQuery } = useAuth();
+
   const getStatusStyle = (status: string) => {
     if (status === "active")
       return "bg-green-100 text-green-700";
@@ -30,10 +33,25 @@ export default function MembersTable({
     return "bg-gray-100 text-gray-500";
   };
 
-  if (!data.length) {
+  const filteredData = data.filter((member) => {
+    if (!searchQuery) return true;
+
+    const q = searchQuery.toLowerCase();
+
+    return (
+      member.full_name?.toLowerCase().includes(q) ||
+      member.email?.toLowerCase().includes(q) ||
+      member.phone?.toLowerCase().includes(q) ||
+      String(member.id).includes(q)
+    );
+  });
+
+  if (!filteredData.length) {
     return (
       <div className="bg-white rounded-xl shadow p-6 text-center text-gray-500">
-        No members found
+        {searchQuery
+          ? "No matching members found"
+          : "No members found"}
       </div>
     );
   }
@@ -51,7 +69,7 @@ export default function MembersTable({
         </thead>
 
         <tbody className="text-sm text-gray-700">
-          {data.map((member) => {
+          {filteredData.map((member) => {
             const sub = subscriptions[member.id];
 
             return (
@@ -105,8 +123,6 @@ export default function MembersTable({
                 {/* ACTIONS */}
                 <td className="p-4">
                   <div className="flex gap-2">
-
-                    {/* Only show if handler exists */}
                     {onEdit && (
                       <button
                         onClick={() => onEdit(member)}
@@ -124,7 +140,6 @@ export default function MembersTable({
                         Assign
                       </button>
                     )}
-
                   </div>
                 </td>
               </tr>

@@ -12,12 +12,18 @@ type UserType = {
 type AuthContextType = {
   user: UserType | null;
   token: string | null;
+  loading: boolean;
+
   setUser: (user: UserType | null) => void;
   login: (data: { token: string; user: UserType }) => void;
   logout: () => void;
+
   isAdmin: boolean;
   isStaff: boolean;
   isMember: boolean;
+
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,14 +31,24 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<UserType | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const storedToken = localStorage.getItem("token");
+    try {
+      const storedUser = localStorage.getItem("user");
+      const storedToken = localStorage.getItem("token");
 
-    if (storedUser && storedToken) {
-      setUser(JSON.parse(storedUser));
-      setToken(storedToken);
+      if (storedUser && storedToken) {
+        setUser(JSON.parse(storedUser));
+        setToken(storedToken);
+      }
+    } catch (err) {
+      console.error("Auth load error:", err);
+      localStorage.clear();
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -63,12 +79,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       value={{
         user,
         token,
+        loading,
+
         setUser,
         login,
         logout,
+
         isAdmin,
         isStaff,
         isMember,
+
+        searchQuery,
+        setSearchQuery,
       }}
     >
       {children}

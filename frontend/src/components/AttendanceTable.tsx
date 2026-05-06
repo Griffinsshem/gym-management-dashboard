@@ -18,7 +18,7 @@ export default function AttendanceTable({ data }: Props) {
   return (
     <div className="bg-white rounded-xl shadow overflow-hidden">
       <table className="w-full text-sm">
-        <thead className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
+        <thead className="bg-gray-50 text-gray-900 text-xs capitalize tracking-wide font-bold">
           <tr>
             <th className="p-4 text-left">Session</th>
             <th className="p-4 text-left">Check In</th>
@@ -37,17 +37,17 @@ export default function AttendanceTable({ data }: Props) {
                 className="border-t hover:bg-gray-50 transition"
               >
                 {/* Session */}
-                <td className="p-4 font-medium text-gray-900">
-                  #{item.id}
+                <td className="p-4 font-bold text-gray-900">
+                  {item.id}
                 </td>
 
                 {/* Check In */}
-                <td className="p-4">
+                <td className="p-4 font-medium text-gray-900">
                   {formatDate(item.check_in_time)}
                 </td>
 
                 {/* Check Out */}
-                <td className="p-4">
+                <td className="p-4 font-medium text-gray-900">
                   {item.check_out_time
                     ? formatDate(item.check_out_time)
                     : "-"}
@@ -58,8 +58,8 @@ export default function AttendanceTable({ data }: Props) {
                   <span
                     className={`px-2 py-1 text-xs rounded-full font-medium
                     ${isActive
-                        ? "bg-green-100 text-green-700"
-                        : "bg-gray-100 text-gray-600"
+                        ? "bg-green-300 text-green-900 font-bold"
+                        : "bg-gray-300 text-gray-900 font-bold"
                       }`}
                   >
                     {isActive ? "Active" : "Completed"}
