@@ -2,6 +2,7 @@ from app.repositories.user_repository import UserRepository
 from app.repositories.member_repository import MemberRepository
 from app.extensions import bcrypt, db
 from app.utils.token import generate_access_token
+from app.models.user import UserRole
 
 
 class AuthService:
@@ -9,24 +10,27 @@ class AuthService:
         self.user_repo = UserRepository()
         self.member_repo = MemberRepository()
 
-    def register_user(self, email, password, role="member"):
+    def register_member_user(self, email, password):
         if not email or not password:
             raise ValueError("Email and password are required")
 
         existing_user = self.user_repo.get_by_email(email)
+
         if existing_user:
             raise ValueError("User already exists")
 
         try:
-            password_hash = bcrypt.generate_password_hash(password).decode("utf-8")
+            password_hash = bcrypt.generate_password_hash(
+                password
+            ).decode("utf-8")
 
             user = self.user_repo.create({
                 "email": email,
                 "password_hash": password_hash,
-                "role": role
+                "role": UserRole.member
             })
 
-            member = self.member_repo.create({
+            self.member_repo.create({
                 "user_id": user.id,
                 "full_name": email.split("@")[0],
                 "email": email,
@@ -34,11 +38,42 @@ class AuthService:
             })
 
             db.session.commit()
+
             return user
 
         except Exception as e:
             db.session.rollback()
             raise e
+
+
+    def create_staff_user(self, email, password):
+        if not email or not password:
+            raise ValueError("Email and password are required")
+
+        existing_user = self.user_repo.get_by_email(email)
+
+        if existing_user:
+            raise ValueError("User already exists")
+
+        try:
+            password_hash = bcrypt.generate_password_hash(
+                password
+            ).decode("utf-8")
+
+            user = self.user_repo.create({
+                "email": email,
+                "password_hash": password_hash,
+                "role": UserRole.staff
+            })
+
+            db.session.commit()
+
+            return user
+
+        except Exception as e:
+            db.session.rollback()
+            raise e
+
 
     def login_user(self, email, password):
         if not email or not password:
@@ -49,20 +84,26 @@ class AuthService:
         if not user:
             raise ValueError("Invalid credentials")
 
-        if not bcrypt.check_password_hash(user.password_hash, password):
+        if not bcrypt.check_password_hash(
+            user.password_hash,
+            password
+        ):
             raise ValueError("Invalid credentials")
+
+        if not user.is_active:
+            raise ValueError("Account is deactivated")
 
         member = self.member_repo.model.query.filter_by(
             user_id=user.id
         ).first()
 
-        if not member:
-            raise ValueError("User is not linked to a member profile")
-        
-        access_token = generate_access_token(user, member.id)
+        access_token = generate_access_token(
+            user=user,
+            member_id=member.id if member else None
+        )
 
         return {
             "user": user,
             "access_token": access_token,
-            "member_id": member.id
+            "member_id": member.id if member else None
         }
