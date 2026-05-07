@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, jsonify, g
 from app.services.notification_service import NotificationService
 from app.utils.decorators import jwt_required
 
@@ -15,7 +15,7 @@ notification_service = NotificationService()
 @jwt_required
 def get_notifications():
     try:
-        user = request.user
+        user = g.user
 
         notifications = notification_service.get_notifications(user)
 
