@@ -45,8 +45,6 @@ export default function Sidebar() {
       icon: CreditCard,
       roles: ["admin", "staff"],
     },
-
-    // NEW STAFF MANAGEMENT PAGE
     {
       name: "Staff",
       href: "/dashboard/staff",
@@ -96,8 +94,9 @@ export default function Sidebar() {
         <nav className="space-y-2">
           {filteredNav.map((item) => {
             const isActive =
-              pathname === item.href ||
-              pathname.startsWith(`${item.href}/`);
+              item.href === "/dashboard"
+                ? pathname === "/dashboard"
+                : pathname.startsWith(item.href);
 
             return (
               <Link
