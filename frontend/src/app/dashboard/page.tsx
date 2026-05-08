@@ -128,10 +128,8 @@ export default function Dashboard() {
 
   return (
     <div className="flex bg-gray-100">
-      <Sidebar />
 
       <div className="flex-1 min-h-screen">
-        <Navbar />
 
         <div className="p-6 max-w-7xl mx-auto space-y-6">
 

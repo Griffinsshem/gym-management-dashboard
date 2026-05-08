@@ -128,7 +128,7 @@ export default function StaffManagementPage() {
   ).length;
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen p-6 lg:p-10 bg-gray-50">
 
       {/* HEADER */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
