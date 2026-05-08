@@ -15,7 +15,7 @@ def register():
         return error_response("Invalid request body", "BAD_REQUEST", 400)
 
     try:
-        user = auth_service.register_user(
+        user = auth_service.register_member_user(
             email=data.get("email"),
             password=data.get("password")
         )

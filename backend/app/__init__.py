@@ -18,7 +18,7 @@ def create_app():
     bcrypt.init_app(app)
 
     # Import models AFTER db init (important)
-    from app import models  # noqa
+    from app import models
 
     # Register Blueprints
     from app.api.auth.routes import auth_bp
@@ -27,6 +27,7 @@ def create_app():
     from app.api.subscriptions.routes import subscriptions_bp
     from app.api.attendance.routes import attendance_bp
     from app.api.notifications.routes import notifications_bp
+    from app.api.users.routes import users_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(member_bp)
@@ -34,6 +35,7 @@ def create_app():
     app.register_blueprint(subscriptions_bp)
     app.register_blueprint(attendance_bp)
     app.register_blueprint(notifications_bp)
+    app.register_blueprint(users_bp)
 
 
     @app.errorhandler(400)
