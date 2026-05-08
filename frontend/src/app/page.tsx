@@ -89,10 +89,6 @@ export default function HomePage() {
               Features
             </a>
 
-            <a href="#analytics" className="hover:text-blue-600 transition">
-              Analytics
-            </a>
-
             <a href="#benefits" className="hover:text-blue-600 transition">
               Benefits
             </a>
