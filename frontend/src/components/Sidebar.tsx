@@ -75,7 +75,7 @@ export default function Sidebar() {
         <div className="mb-10">
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg">
-              <Dumbbell size={20} className="text-white" />
+              <Dumbbell size={20} className="text-gray-200" />
             </div>
 
             <div>
@@ -83,7 +83,7 @@ export default function Sidebar() {
                 Gym<span className="text-blue-500">Pro</span>
               </h1>
 
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-gray-300">
                 Management Dashboard
               </p>
             </div>

@@ -73,7 +73,6 @@ export default function StaffManagementPage() {
     fetchStaff();
   }, []);
 
-
   const handleCreateStaff = async (
     e: React.FormEvent
   ) => {
@@ -108,14 +107,13 @@ export default function StaffManagementPage() {
       console.error("CREATE STAFF ERROR:", err);
 
       setError(
-        err?.response?.data?.error ||
+        err?.response?.data?.error?.message ||
         "Failed to create staff account"
       );
     } finally {
       setCreating(false);
     }
   };
-
 
   const filteredStaff = useMemo(() => {
     return staff.filter((s) =>
@@ -128,13 +126,13 @@ export default function StaffManagementPage() {
   ).length;
 
   return (
-    <div className="min-h-screen p-6 lg:p-10 bg-gray-50">
+    <div className="min-h-screen bg-gray-50 p-6 lg:p-10">
 
       {/* HEADER */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
 
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-gray-900">
             Staff Management
           </h1>
 
@@ -153,10 +151,11 @@ export default function StaffManagementPage() {
       </div>
 
       {/* STATS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
 
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
+
             <div>
               <p className="text-sm text-gray-500">
                 Total Staff
@@ -175,6 +174,7 @@ export default function StaffManagementPage() {
 
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
+
             <div>
               <p className="text-sm text-gray-500">
                 Active Staff
@@ -193,6 +193,7 @@ export default function StaffManagementPage() {
 
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
+
             <div>
               <p className="text-sm text-gray-500">
                 Admin Controlled
@@ -213,7 +214,7 @@ export default function StaffManagementPage() {
       {/* MAIN GRID */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
-        {/* CREATE FORM */}
+        {/* FORM */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-fit">
 
           <div className="flex items-center gap-2 mb-6">
@@ -235,10 +236,10 @@ export default function StaffManagementPage() {
                 Staff Email
               </label>
 
-              <div className="flex items-center border border-gray-200 rounded-xl px-3 py-3 focus-within:ring-2 focus-within:ring-blue-500">
+              <div className="flex items-center border border-gray-200 rounded-xl px-3 py-3 bg-white focus-within:ring-2 focus-within:ring-blue-500">
                 <Mail
                   size={16}
-                  className="text-gray-400"
+                  className="text-gray-500"
                 />
 
                 <input
@@ -249,7 +250,7 @@ export default function StaffManagementPage() {
                     setEmail(e.target.value)
                   }
                   placeholder="staff@gym.com"
-                  className="flex-1 outline-none bg-transparent ml-2 text-sm"
+                  className="flex-1 ml-2 bg-transparent outline-none text-sm text-gray-900 placeholder:text-gray-400"
                 />
               </div>
             </div>
@@ -260,7 +261,8 @@ export default function StaffManagementPage() {
                 Temporary Password
               </label>
 
-              <div className="flex items-center border border-gray-200 rounded-xl px-3 py-3 focus-within:ring-2 focus-within:ring-blue-500">
+              <div className="flex items-center border border-gray-200 rounded-xl px-3 py-3 bg-white focus-within:ring-2 focus-within:ring-blue-500">
+
                 <input
                   type={
                     showPassword ? "text" : "password"
@@ -271,7 +273,7 @@ export default function StaffManagementPage() {
                     setPassword(e.target.value)
                   }
                   placeholder="Minimum 8 characters"
-                  className="flex-1 outline-none bg-transparent text-sm"
+                  className="flex-1 bg-transparent outline-none text-sm text-gray-900 placeholder:text-gray-400"
                 />
 
                 <button
@@ -335,7 +337,7 @@ export default function StaffManagementPage() {
           </form>
         </div>
 
-        {/* STAFF TABLE */}
+        {/* TABLE */}
         <div className="xl:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
 
           {/* TOP */}
@@ -353,6 +355,7 @@ export default function StaffManagementPage() {
 
             {/* SEARCH */}
             <div className="flex items-center bg-gray-100 rounded-xl px-3 py-2 w-full md:w-72">
+
               <Search
                 size={16}
                 className="text-gray-400"
@@ -365,7 +368,7 @@ export default function StaffManagementPage() {
                   setSearch(e.target.value)
                 }
                 placeholder="Search staff..."
-                className="bg-transparent outline-none ml-2 flex-1 text-sm"
+                className="bg-transparent outline-none ml-2 flex-1 text-sm text-gray-900 placeholder:text-gray-400"
               />
             </div>
           </div>
@@ -382,6 +385,7 @@ export default function StaffManagementPage() {
               </div>
             ) : filteredStaff.length === 0 ? (
               <div className="text-center py-20">
+
                 <Users
                   size={40}
                   className="mx-auto text-gray-300 mb-3"
@@ -393,6 +397,7 @@ export default function StaffManagementPage() {
               </div>
             ) : (
               <table className="w-full">
+
                 <thead className="bg-gray-50 text-xs uppercase text-gray-500 tracking-wide">
                   <tr>
                     <th className="text-left px-6 py-4">
@@ -416,6 +421,7 @@ export default function StaffManagementPage() {
                       className="border-t hover:bg-gray-50 transition"
                     >
                       <td className="px-6 py-4">
+
                         <div className="flex items-center gap-3">
 
                           <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold">
@@ -450,6 +456,7 @@ export default function StaffManagementPage() {
                     </tr>
                   ))}
                 </tbody>
+
               </table>
             )}
 
