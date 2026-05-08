@@ -1,46 +1,58 @@
 "use client";
 
 import { useState } from "react";
-import { loginUser } from "@/lib/auth";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
 
 import {
+  Dumbbell,
   Loader2,
   Mail,
   Lock,
   Eye,
   EyeOff,
   ArrowRight,
-  Dumbbell,
 } from "lucide-react";
 
 import toast from "react-hot-toast";
 
-export default function LoginPage() {
+import { registerUser, loginUser } from "@/lib/auth";
+import { useAuth } from "@/context/AuthContext";
+
+export default function RegisterPage() {
   const router = useRouter();
 
   const { login } = useAuth();
-
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
 
   const [loading, setLoading] = useState(false);
 
   const [showPassword, setShowPassword] =
     useState(false);
 
-  const handleLogin = async () => {
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
+
+  const handleRegister = async () => {
     if (!form.email || !form.password) {
       return toast.error(
         "Email and password are required"
       );
     }
 
+    if (form.password.length < 8) {
+      return toast.error(
+        "Password must be at least 8 characters"
+      );
+    }
+
     try {
       setLoading(true);
+
+      await registerUser(
+        form.email,
+        form.password
+      );
 
       const res = await loginUser(
         form.email,
@@ -50,22 +62,24 @@ export default function LoginPage() {
       const {
         access_token,
         id,
-        email: userEmail,
-        member_id,
+        email,
         role,
+        member_id,
       } = res;
 
       login({
         token: access_token,
         user: {
           id,
-          email: userEmail,
-          member_id,
+          email,
           role,
+          member_id,
         },
       });
 
-      toast.success("Welcome back 👋");
+      toast.success(
+        "Account created successfully 🎉"
+      );
 
       router.push("/dashboard");
     } catch (err: any) {
@@ -76,7 +90,7 @@ export default function LoginPage() {
         typeof errorData === "string"
           ? errorData
           : errorData?.message ||
-          "Invalid email or password";
+          "Registration failed";
 
       toast.error(message);
     } finally {
@@ -90,64 +104,52 @@ export default function LoginPage() {
       {/* LEFT SIDE */}
       <div className="hidden lg:flex flex-col justify-center bg-blue-600 text-white p-16 relative overflow-hidden">
 
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 opacity-95" />
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 opacity-90" />
 
         <div className="relative z-10 max-w-lg">
 
-          {/* LOGO */}
-          <div className="flex items-center gap-4 mb-10">
+          <div className="flex items-center gap-3 mb-8">
 
-            <div className="w-16 h-16 rounded-3xl bg-white/20 backdrop-blur flex items-center justify-center shadow-lg">
-              <Dumbbell size={30} />
+            <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center">
+              <Dumbbell size={28} />
             </div>
 
             <div>
-              <h1 className="text-4xl font-bold">
+              <h1 className="text-3xl font-bold">
                 GymPro
               </h1>
 
-              <p className="text-blue-100 text-sm mt-1">
-                Modern Gym Management Platform
+              <p className="text-blue-100 text-sm">
+                Smart Gym Management
               </p>
             </div>
           </div>
 
-          {/* HERO TEXT */}
           <h2 className="text-5xl font-bold leading-tight">
-            Welcome Back To Your Fitness Hub
+            Start Your Fitness Journey Today
           </h2>
 
           <p className="mt-6 text-lg text-blue-100 leading-8">
-            Manage members, subscriptions,
-            attendance, staff, and analytics from
-            one centralized dashboard.
+            Join GymPro and manage your gym
+            memberships, subscriptions, and
+            fitness progress seamlessly.
           </p>
 
-          {/* FEATURES */}
-          <div className="mt-10 space-y-5">
+          <div className="mt-10 space-y-4">
 
             <div className="flex items-center gap-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-white" />
-
-              <p className="text-blue-50">
-                Real-time gym analytics
-              </p>
+              <div className="w-2 h-2 rounded-full bg-white" />
+              <p>Track subscriptions easily</p>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-white" />
-
-              <p className="text-blue-50">
-                Manage subscriptions easily
-              </p>
+              <div className="w-2 h-2 rounded-full bg-white" />
+              <p>Monitor attendance in real-time</p>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-white" />
-
-              <p className="text-blue-50">
-                Secure admin & staff access
-              </p>
+              <div className="w-2 h-2 rounded-full bg-white" />
+              <p>Access your dashboard anywhere</p>
             </div>
 
           </div>
@@ -159,36 +161,14 @@ export default function LoginPage() {
 
         <div className="w-full max-w-md bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
 
-          {/* MOBILE LOGO */}
-          <div className="lg:hidden flex items-center justify-center gap-3 mb-8">
-
-            <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center">
-              <Dumbbell
-                className="text-white"
-                size={22}
-              />
-            </div>
-
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                GymPro
-              </h1>
-
-              <p className="text-xs text-gray-500">
-                Smart Gym Management
-              </p>
-            </div>
-          </div>
-
-          {/* HEADER */}
           <div className="mb-8">
 
             <h2 className="text-3xl font-bold text-gray-900">
-              Welcome Back
+              Create Account
             </h2>
 
             <p className="text-gray-500 mt-2">
-              Login to continue to your dashboard
+              Register to access GymPro
             </p>
           </div>
 
@@ -199,7 +179,7 @@ export default function LoginPage() {
               Email Address
             </label>
 
-            <div className="flex items-center border border-gray-200 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-blue-500 transition">
+            <div className="flex items-center border border-gray-200 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-blue-500">
 
               <Mail
                 size={18}
@@ -228,7 +208,7 @@ export default function LoginPage() {
               Password
             </label>
 
-            <div className="flex items-center border border-gray-200 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-blue-500 transition">
+            <div className="flex items-center border border-gray-200 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-blue-500">
 
               <Lock
                 size={18}
@@ -241,7 +221,7 @@ export default function LoginPage() {
                     ? "text"
                     : "password"
                 }
-                placeholder="Enter your password"
+                placeholder="Minimum 8 characters"
                 value={form.password}
                 onChange={(e) =>
                   setForm({
@@ -275,48 +255,41 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* LOGIN BUTTON */}
+          {/* BUTTON */}
           <button
-            onClick={handleLogin}
+            onClick={handleRegister}
             disabled={loading}
-            className={`w-full flex justify-center items-center gap-2 py-3 rounded-xl font-medium text-white transition-all
-              ${loading
-                ? "bg-blue-400"
-                : "bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20"
-              }`}
+            className="w-full bg-blue-600 hover:bg-blue-700 transition text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2 disabled:opacity-60"
           >
             {loading ? (
               <>
-                <Loader2 className="animate-spin w-5 h-5" />
-                Signing In...
+                <Loader2
+                  size={18}
+                  className="animate-spin"
+                />
+                Creating Account...
               </>
             ) : (
               <>
-                Sign In
+                Create Account
                 <ArrowRight size={18} />
               </>
             )}
           </button>
 
-          {/* REGISTER LINK */}
+          {/* LOGIN LINK */}
           <p className="text-sm text-gray-500 text-center mt-6">
 
-            Don&apos;t have an account?{" "}
+            Already have an account?{" "}
 
             <button
               onClick={() =>
-                router.push("/register")
+                router.push("/login")
               }
               className="text-blue-600 hover:text-blue-700 font-medium"
             >
-              Create Account
+              Sign In
             </button>
-          </p>
-
-          {/* FOOTER */}
-          <p className="text-xs text-gray-400 mt-8 text-center">
-            © {new Date().getFullYear()} GymPro.
-            All rights reserved.
           </p>
         </div>
       </div>
