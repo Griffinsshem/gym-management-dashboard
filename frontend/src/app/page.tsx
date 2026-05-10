@@ -77,7 +77,7 @@ export default function HomePage() {
                 Gym<span className="text-blue-600">Pro</span>
               </h1>
 
-              <p className="text-xs text-gray-900">
+              <p className="text-sm text-gray-900 font-bold">
                 Management Platform
               </p>
             </div>
