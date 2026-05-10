@@ -77,7 +77,7 @@ export default function HomePage() {
                 Gym<span className="text-blue-600">Pro</span>
               </h1>
 
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-900">
                 Management Platform
               </p>
             </div>
@@ -85,11 +85,11 @@ export default function HomePage() {
 
           {/* NAV LINKS */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
-            <a href="#features" className="hover:text-blue-600 transition">
+            <a href="#features" className="hover:text-blue-600 transition font-bold text-lg text-gray-900">
               Features
             </a>
 
-            <a href="#benefits" className="hover:text-blue-600 transition">
+            <a href="#benefits" className="hover:text-blue-600 transition font-bold text-lg text-gray-900">
               Benefits
             </a>
           </nav>
@@ -98,14 +98,14 @@ export default function HomePage() {
           <div className="flex items-center gap-3">
             <Link
               href="/login"
-              className="text-sm font-medium text-gray-700 hover:text-blue-600 transition"
+              className="text-sm font-semibold text-gray-900 hover:text-blue-600 transition"
             >
               Login
             </Link>
 
             <Link
               href="/register"
-              className="bg-blue-600 hover:bg-blue-700 transition text-white px-5 py-2.5 rounded-xl text-sm font-medium shadow-lg shadow-blue-500/20"
+              className="bg-blue-600 hover:bg-blue-700 transition text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-blue-500/20"
             >
               Get Started
             </Link>
@@ -125,7 +125,7 @@ export default function HomePage() {
             {/* LEFT */}
             <div>
 
-              <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+              <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-bold mb-6">
                 <CheckCircle2 size={16} />
                 Smart Gym Management System
               </div>
@@ -135,7 +135,7 @@ export default function HomePage() {
                 <span className="text-blue-600"> Smarter</span>
               </h1>
 
-              <p className="mt-6 text-lg text-gray-600 leading-8 max-w-xl">
+              <p className="mt-6 text-lg text-gray-900 leading-8 max-w-xl font-semi-bold">
                 GymPro helps gyms manage members, subscriptions,
                 attendance, staff, and analytics from one powerful
                 dashboard.
@@ -153,7 +153,7 @@ export default function HomePage() {
 
                 <Link
                   href="/register"
-                  className="border border-gray-200 hover:border-blue-600 hover:text-blue-600 transition px-6 py-4 rounded-2xl font-medium text-gray-700 flex items-center justify-center"
+                  className="border border-gray-500 hover:border-blue-600 hover:text-blue-600 transition px-6 py-4 rounded-2xl font-semibold text-gray-900 flex items-center justify-center"
                 >
                   Create Account
                 </Link>
@@ -171,7 +171,7 @@ export default function HomePage() {
                       {stat.value}
                     </h3>
 
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-gray-900 mt-1font-semi-bold text-sm">
                       {stat.label}
                     </p>
                   </div>
@@ -188,7 +188,7 @@ export default function HomePage() {
                 <div className="flex items-center justify-between mb-8">
 
                   <div>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-900 font-bold">
                       Gym Overview
                     </p>
 
@@ -199,7 +199,7 @@ export default function HomePage() {
 
                   <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center">
                     <BarChart3
-                      className="text-blue-600"
+                      className="text-blue-900"
                       size={26}
                     />
                   </div>
@@ -209,7 +209,7 @@ export default function HomePage() {
                 <div className="grid grid-cols-2 gap-4">
 
                   <div className="bg-gray-50 rounded-2xl p-5">
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-900 font-bold">
                       Total Members
                     </p>
 
@@ -219,7 +219,7 @@ export default function HomePage() {
                   </div>
 
                   <div className="bg-gray-50 rounded-2xl p-5">
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-900 font-bold">
                       Active Plans
                     </p>
 
@@ -229,7 +229,7 @@ export default function HomePage() {
                   </div>
 
                   <div className="bg-gray-50 rounded-2xl p-5">
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-900 font-bold">
                       Attendance Today
                     </p>
 
@@ -239,7 +239,7 @@ export default function HomePage() {
                   </div>
 
                   <div className="bg-gray-50 rounded-2xl p-5">
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-900 font-bold">
                       Revenue
                     </p>
 
@@ -254,7 +254,7 @@ export default function HomePage() {
                   <div className="flex items-center justify-between">
 
                     <div>
-                      <p className="text-sm text-blue-700 font-medium">
+                      <p className="text-lg text-blue-700 font-bold">
                         System Status
                       </p>
 
@@ -284,7 +284,7 @@ export default function HomePage() {
               Powerful Features Built For Modern Gyms
             </h2>
 
-            <p className="text-gray-600 mt-5 text-lg leading-8">
+            <p className="text-blue-900 mt-5 text-lg leading-8">
               Everything you need to manage operations,
               memberships, staff, and analytics efficiently.
             </p>
@@ -295,7 +295,7 @@ export default function HomePage() {
             {features.map((feature) => (
               <div
                 key={feature.title}
-                className="bg-white rounded-3xl border border-gray-100 p-7 shadow-sm hover:shadow-xl transition-all duration-300"
+                className="bg-white rounded-3xl border border-gray-600 p-7 shadow-sm hover:shadow-xl transition-all duration-300"
               >
                 <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center mb-6">
                   <feature.icon
@@ -308,7 +308,7 @@ export default function HomePage() {
                   {feature.title}
                 </h3>
 
-                <p className="text-gray-600 mt-4 leading-7 text-sm">
+                <p className="text-gray-700 mt-4 leading-7 text-sm font-bold">
                   {feature.description}
                 </p>
               </div>
@@ -328,7 +328,7 @@ export default function HomePage() {
             Why Gym Owners Choose GymPro
           </h2>
 
-          <p className="text-lg text-gray-600 mt-5 max-w-3xl mx-auto leading-8">
+          <p className="text-lg text-gray-900 mt-5 max-w-3xl mx-auto leading-8">
             GymPro is designed to simplify operations,
             improve efficiency, and help fitness businesses
             scale faster with smart automation.
@@ -336,34 +336,34 @@ export default function HomePage() {
 
           <div className="grid md:grid-cols-3 gap-6 mt-16">
 
-            <div className="bg-gray-50 rounded-3xl p-8 border border-gray-100">
+            <div className="bg-gray-200 rounded-3xl p-8 border border-gray-100">
               <h3 className="text-xl font-semibold text-gray-900">
                 Faster Operations
               </h3>
 
-              <p className="text-gray-600 mt-4 leading-7">
+              <p className="text-gray-900 mt-4 leading-7">
                 Reduce manual work with automated
                 membership and attendance management.
               </p>
             </div>
 
-            <div className="bg-gray-50 rounded-3xl p-8 border border-gray-100">
+            <div className="bg-gray-200 rounded-3xl p-8 border border-gray-100">
               <h3 className="text-xl font-semibold text-gray-900">
                 Secure Access
               </h3>
 
-              <p className="text-gray-600 mt-4 leading-7">
+              <p className="text-gray-900 mt-4 leading-7">
                 Role-based authentication keeps your
                 system secure and organized.
               </p>
             </div>
 
-            <div className="bg-gray-50 rounded-3xl p-8 border border-gray-100">
+            <div className="bg-gray-200 rounded-3xl p-8 border border-gray-100">
               <h3 className="text-xl font-semibold text-gray-900">
                 Real-Time Insights
               </h3>
 
-              <p className="text-gray-600 mt-4 leading-7">
+              <p className="text-gray-900 mt-4 leading-7">
                 Track business performance and make
                 smarter decisions using live analytics.
               </p>
@@ -418,13 +418,13 @@ export default function HomePage() {
                 GymPro
               </h3>
 
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-900 font-bold">
                 Modern Gym Management Platform
               </p>
             </div>
           </div>
 
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-900 font-bold">
             © 2026 GymPro. All rights reserved.
           </p>
         </div>
