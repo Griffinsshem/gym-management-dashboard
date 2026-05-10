@@ -167,7 +167,7 @@ export default function RegisterPage() {
               Create Account
             </h2>
 
-            <p className="text-gray-500 mt-2">
+            <p className="text-gray-900 mt-2 font-semibold">
               Register to access GymPro
             </p>
           </div>
@@ -175,15 +175,15 @@ export default function RegisterPage() {
           {/* EMAIL */}
           <div className="mb-5">
 
-            <label className="text-sm font-medium text-gray-700 mb-2 block">
+            <label className="text-sm font-medium text-gray-900 mb-2 block">
               Email Address
             </label>
 
-            <div className="flex items-center border border-gray-200 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-blue-500">
+            <div className="flex items-center border border-gray-600 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-blue-500">
 
               <Mail
                 size={18}
-                className="text-gray-400"
+                className="text-gray-900"
               />
 
               <input
@@ -208,11 +208,11 @@ export default function RegisterPage() {
               Password
             </label>
 
-            <div className="flex items-center border border-gray-200 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-blue-500">
+            <div className="flex items-center border border-gray-600 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-blue-500">
 
               <Lock
                 size={18}
-                className="text-gray-400"
+                className="text-gray-900"
               />
 
               <input
@@ -278,7 +278,7 @@ export default function RegisterPage() {
           </button>
 
           {/* LOGIN LINK */}
-          <p className="text-sm text-gray-500 text-center mt-6">
+          <p className="text-sm text-gray-900 text-center mt-6 font-semibold">
 
             Already have an account?{" "}
 

@@ -187,7 +187,7 @@ export default function LoginPage() {
               Welcome Back
             </h2>
 
-            <p className="text-gray-500 mt-2">
+            <p className="text-gray-900 mt-2">
               Login to continue to your dashboard
             </p>
           </div>
@@ -195,15 +195,15 @@ export default function LoginPage() {
           {/* EMAIL */}
           <div className="mb-5">
 
-            <label className="text-sm font-medium text-gray-700 mb-2 block">
+            <label className="text-sm font-medium text-gray-900 mb-2 block">
               Email Address
             </label>
 
-            <div className="flex items-center border border-gray-200 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-blue-500 transition">
+            <div className="flex items-center border border-gray-600 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-blue-500 transition">
 
               <Mail
                 size={18}
-                className="text-gray-400"
+                className="text-gray-900"
               />
 
               <input
@@ -228,11 +228,11 @@ export default function LoginPage() {
               Password
             </label>
 
-            <div className="flex items-center border border-gray-200 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-blue-500 transition">
+            <div className="flex items-center border border-gray-600 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-blue-500 transition">
 
               <Lock
                 size={18}
-                className="text-gray-400"
+                className="text-gray-900"
               />
 
               <input
@@ -299,7 +299,7 @@ export default function LoginPage() {
           </button>
 
           {/* REGISTER LINK */}
-          <p className="text-sm text-gray-500 text-center mt-6">
+          <p className="text-lg text-gray-900 text-center mt-6 font-bold">
 
             Don&apos;t have an account?{" "}
 
@@ -314,7 +314,7 @@ export default function LoginPage() {
           </p>
 
           {/* FOOTER */}
-          <p className="text-xs text-gray-400 mt-8 text-center">
+          <p className="text-xs text-gray-900 mt-8 text-center">
             © {new Date().getFullYear()} GymPro.
             All rights reserved.
           </p>
