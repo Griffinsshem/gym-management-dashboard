@@ -48,3 +48,12 @@ export const getMemberSubscription = async (memberId: number) => {
   const res = await apiClient.get(`/subscriptions/member/${memberId}`);
   return res.data.data;
 };
+
+export const getMemberSubscriptions = async (
+  memberId: number
+) => {
+  const res = await apiClient.get(
+    `/subscriptions/member/${memberId}/history`
+  );
+  return res.data.data;
+};
