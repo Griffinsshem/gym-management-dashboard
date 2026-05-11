@@ -15,6 +15,7 @@ import MemberSubscriptionCard from "@/components/dashboard/MemberSubscriptionCar
 import AssignPlanModal from "@/components/subscriptions/AssignPlanModal";
 import { apiClient } from "@/lib/api";
 import { getMemberSubscription } from "@/lib/subscription";
+import MemberProfileCard from "@/components/dashboard/MemberProfileCard";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
 
@@ -29,6 +30,7 @@ export default function Dashboard() {
   const [selectedMember, setSelectedMember] = useState<any>(null);
   const [openRenewModal, setOpenRenewModal] = useState(false);
   const [subscription, setSubscription] = useState<any>(null);
+
 
   const [stats, setStats] = useState({
     total_revenue: 0,
@@ -150,9 +152,24 @@ export default function Dashboard() {
     }
   };
 
+  // ================= DERIVED STATE =================
+
   const hasActiveSession = data.some(
     (record) => record.check_out_time === null
   );
+
+  const subscriptionStatus = subscription?.status?.toLowerCase();
+
+  const canCheckIn =
+    !isMember ||
+    (subscriptionStatus === "active" &&
+      subscription?.days_remaining > 0);
+
+  const disableCheckIn =
+    !memberId ||
+    hasActiveSession ||
+    checkingIn ||
+    !canCheckIn;
 
   return (
     <div className="flex bg-gray-100">
@@ -188,40 +205,61 @@ export default function Dashboard() {
           )}
 
           {/* ===== QUICK ACTIONS (ALL USERS) ===== */}
-          <div className="bg-white rounded-xl shadow p-5 flex gap-4">
-            <button
-              onClick={handleCheckIn}
-              disabled={!memberId || hasActiveSession || checkingIn}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium text-white transition ${!memberId || hasActiveSession
-                  ? "bg-gray-900"
+          <div className="bg-white rounded-xl shadow p-5">
+            <div className="flex gap-4">
+              <button
+                onClick={handleCheckIn}
+                disabled={disableCheckIn}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium text-white transition ${disableCheckIn
+                  ? "bg-gray-400 cursor-not-allowed"
                   : "bg-green-600 hover:bg-green-700 shadow"
-                }`}
-            >
-              {checkingIn && (
-                <Loader2 className="animate-spin w-4 h-4" />
-              )}
-              {checkingIn ? "Checking In..." : "Check In"}
-            </button>
+                  }`}
+              >
+                {checkingIn && (
+                  <Loader2 className="animate-spin w-4 h-4" />
+                )}
+                {checkingIn ? "Checking In..." : "Check In"}
+              </button>
 
-            <button
-              onClick={handleCheckOut}
-              disabled={!memberId || !hasActiveSession || checkingOut}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium text-white transition ${!memberId || !hasActiveSession
+              <button
+                onClick={handleCheckOut}
+                disabled={
+                  !memberId ||
+                  !hasActiveSession ||
+                  checkingOut
+                }
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium text-white transition ${!memberId ||
+                  !hasActiveSession ||
+                  checkingOut
                   ? "bg-gray-500"
                   : "bg-red-600 hover:bg-red-700 shadow"
-                }`}
-            >
-              {checkingOut && (
-                <Loader2 className="animate-spin w-4 h-4" />
-              )}
-              {checkingOut ? "Checking Out..." : "Check Out"}
-            </button>
+                  }`}
+              >
+                {checkingOut && (
+                  <Loader2 className="animate-spin w-4 h-4" />
+                )}
+                {checkingOut ? "Checking Out..." : "Check Out"}
+              </button>
+            </div>
+
+            {/* ===== MEMBER WARNING ===== */}
+            {isMember && !canCheckIn && (
+              <p className="text-sm text-red-600 mt-3">
+                Your membership is inactive or expired.
+                Please contact the gym to renew.
+              </p>
+            )}
           </div>
 
           {/* ===== MEMBER SUBSCRIPTION CARD ===== */}
           {isMember && (
-            <MemberSubscriptionCard subscription={subscription} />
+            <MemberSubscriptionCard
+              subscription={subscription}
+            />
           )}
+
+          {/* ===== MEMBER PROFILE CARD ===== */}
+          {isMember && <MemberProfileCard user={user} />}
 
           {/* ===== MAIN GRID ===== */}
           <div className="grid md:grid-cols-3 gap-6">
@@ -232,7 +270,9 @@ export default function Dashboard() {
               </h3>
 
               {loading ? (
-                <p className="text-gray-400 text-sm">Loading...</p>
+                <p className="text-gray-400 text-sm">
+                  Loading...
+                </p>
               ) : (
                 <AttendanceTable data={data} />
               )}
