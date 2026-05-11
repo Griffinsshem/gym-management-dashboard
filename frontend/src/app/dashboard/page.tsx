@@ -8,13 +8,13 @@ import {
   Loader2,
   TrendingUp,
 } from "lucide-react";
-import Sidebar from "@/components/Sidebar";
-import Navbar from "@/components/Navbar";
 import StatsCard from "@/components/StatsCard";
 import AttendanceTable from "@/components/AttendanceTable";
 import AttendanceChart from "@/components/dashboard/AttendanceChart";
+import MemberSubscriptionCard from "@/components/dashboard/MemberSubscriptionCard";
 import AssignPlanModal from "@/components/subscriptions/AssignPlanModal";
 import { apiClient } from "@/lib/api";
+import { getMemberSubscription } from "@/lib/subscription";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
 
@@ -28,6 +28,7 @@ export default function Dashboard() {
   const [expiringSubs, setExpiringSubs] = useState<any[]>([]);
   const [selectedMember, setSelectedMember] = useState<any>(null);
   const [openRenewModal, setOpenRenewModal] = useState(false);
+  const [subscription, setSubscription] = useState<any>(null);
 
   const [stats, setStats] = useState({
     total_revenue: 0,
@@ -69,16 +70,29 @@ export default function Dashboard() {
     }
   };
 
+  const fetchSubscription = async (id: number) => {
+    try {
+      const data = await getMemberSubscription(id);
+      setSubscription(data);
+    } catch {
+      setSubscription(null);
+    }
+  };
+
   useEffect(() => {
     if (!memberId) return;
 
     fetchAttendance(memberId);
 
+    if (isMember) {
+      fetchSubscription(memberId);
+    }
+
     if (isAdmin || isStaff) {
       fetchDashboardStats();
       fetchExpiring();
     }
-  }, [memberId, isAdmin, isStaff]);
+  }, [memberId, isAdmin, isStaff, isMember]);
 
   // ================= ACTIONS =================
 
@@ -88,14 +102,20 @@ export default function Dashboard() {
     try {
       setCheckingIn(true);
 
-      await apiClient.post(`/attendance/check-in`, {
+      await apiClient.post("/attendance/check-in", {
         member_id: memberId,
       });
 
       toast.success("Checked in");
       fetchAttendance(memberId);
 
-      if (isAdmin || isStaff) fetchDashboardStats();
+      if (isMember) {
+        fetchSubscription(memberId);
+      }
+
+      if (isAdmin || isStaff) {
+        fetchDashboardStats();
+      }
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Check-in failed");
     } finally {
@@ -109,14 +129,20 @@ export default function Dashboard() {
     try {
       setCheckingOut(true);
 
-      await apiClient.post(`/attendance/check-out`, {
+      await apiClient.post("/attendance/check-out", {
         member_id: memberId,
       });
 
       toast.success("Checked out");
       fetchAttendance(memberId);
 
-      if (isAdmin || isStaff) fetchDashboardStats();
+      if (isMember) {
+        fetchSubscription(memberId);
+      }
+
+      if (isAdmin || isStaff) {
+        fetchDashboardStats();
+      }
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Check-out failed");
     } finally {
@@ -124,20 +150,17 @@ export default function Dashboard() {
     }
   };
 
-  const hasActiveSession = data.some((r) => r.check_out_time === null);
+  const hasActiveSession = data.some(
+    (record) => record.check_out_time === null
+  );
 
   return (
     <div className="flex bg-gray-100">
-
       <div className="flex-1 min-h-screen">
-
         <div className="p-6 max-w-7xl mx-auto space-y-6">
-
           {/* ===== HERO ===== */}
           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 rounded-xl shadow">
-            <h2 className="text-xl font-semibold">
-              Welcome back 👋
-            </h2>
+            <h2 className="text-xl font-semibold">Welcome back 👋</h2>
             <p className="text-sm opacity-90">
               Here's what's happening in your gym today
             </p>
@@ -169,33 +192,39 @@ export default function Dashboard() {
             <button
               onClick={handleCheckIn}
               disabled={!memberId || hasActiveSession || checkingIn}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium text-white transition
-              ${!memberId || hasActiveSession
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium text-white transition ${!memberId || hasActiveSession
                   ? "bg-gray-900"
                   : "bg-green-600 hover:bg-green-700 shadow"
                 }`}
             >
-              {checkingIn && <Loader2 className="animate-spin w-4 h-4" />}
+              {checkingIn && (
+                <Loader2 className="animate-spin w-4 h-4" />
+              )}
               {checkingIn ? "Checking In..." : "Check In"}
             </button>
 
             <button
               onClick={handleCheckOut}
               disabled={!memberId || !hasActiveSession || checkingOut}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium text-white transition
-              ${!memberId || !hasActiveSession
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium text-white transition ${!memberId || !hasActiveSession
                   ? "bg-gray-500"
                   : "bg-red-600 hover:bg-red-700 shadow"
                 }`}
             >
-              {checkingOut && <Loader2 className="animate-spin w-4 h-4" />}
+              {checkingOut && (
+                <Loader2 className="animate-spin w-4 h-4" />
+              )}
               {checkingOut ? "Checking Out..." : "Check Out"}
             </button>
           </div>
 
+          {/* ===== MEMBER SUBSCRIPTION CARD ===== */}
+          {isMember && (
+            <MemberSubscriptionCard subscription={subscription} />
+          )}
+
           {/* ===== MAIN GRID ===== */}
           <div className="grid md:grid-cols-3 gap-6">
-
             {/* LEFT */}
             <div className="md:col-span-2 bg-white rounded-xl shadow p-5">
               <h3 className="text-sm font-semibold text-gray-900 mb-4">
@@ -229,11 +258,14 @@ export default function Dashboard() {
                       >
                         <div>
                           <p className="text-sm font-medium">
-                            {sub.member_name || `Member #${sub.member_id}`}
+                            {sub.member_name ||
+                              `Member #${sub.member_id}`}
                           </p>
                           <p className="text-xs text-red-500">
                             Ends:{" "}
-                            {new Date(sub.end_date).toLocaleDateString()}
+                            {new Date(
+                              sub.end_date
+                            ).toLocaleDateString()}
                           </p>
                         </div>
 
@@ -265,7 +297,8 @@ export default function Dashboard() {
           {/* ===== CHART (ALL USERS) ===== */}
           <div className="bg-white rounded-xl shadow p-5">
             <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
-              <TrendingUp size={16} /> Attendance Trends
+              <TrendingUp size={16} />
+              Attendance Trends
             </h3>
 
             <AttendanceChart data={data} />
@@ -273,7 +306,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* MODAL (ADMIN ONLY) */}
+      {/* ===== MODAL (ADMIN ONLY) ===== */}
       {isAdmin && openRenewModal && selectedMember && (
         <AssignPlanModal
           member={selectedMember}
