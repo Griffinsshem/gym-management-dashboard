@@ -43,3 +43,8 @@ export const assignPlan = async (
     plan_id: planId,
   });
 };
+
+export const getMemberSubscription = async (memberId: number) => {
+  const res = await apiClient.get(`/subscriptions/member/${memberId}`);
+  return res.data.data;
+};
