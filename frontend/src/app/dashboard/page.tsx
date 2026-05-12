@@ -14,8 +14,9 @@ import AttendanceChart from "@/components/dashboard/AttendanceChart";
 import MemberSubscriptionCard from "@/components/dashboard/MemberSubscriptionCard";
 import AssignPlanModal from "@/components/subscriptions/AssignPlanModal";
 import { apiClient } from "@/lib/api";
-import { getMemberSubscription } from "@/lib/subscription";
+import { getMemberSubscription, getMemberSubscriptions } from "@/lib/subscription";
 import MemberProfileCard from "@/components/dashboard/MemberProfileCard";
+import SubscriptionHistoryCard from "@/components/dashboard/SubscriptionHistoryCard";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
 
@@ -30,6 +31,7 @@ export default function Dashboard() {
   const [selectedMember, setSelectedMember] = useState<any>(null);
   const [openRenewModal, setOpenRenewModal] = useState(false);
   const [subscription, setSubscription] = useState<any>(null);
+  const [subscriptionHistory, setSubscriptionHistory] = useState<any[]>([]);
 
 
   const [stats, setStats] = useState({
@@ -81,6 +83,15 @@ export default function Dashboard() {
     }
   };
 
+  const fetchSubscriptionHistory = async (id: number) => {
+    try {
+      const data = await getMemberSubscriptions(id);
+      setSubscriptionHistory(data);
+    } catch {
+      setSubscriptionHistory([]);
+    }
+  };
+
   useEffect(() => {
     if (!memberId) return;
 
@@ -88,6 +99,7 @@ export default function Dashboard() {
 
     if (isMember) {
       fetchSubscription(memberId);
+      fetchSubscriptionHistory(memberId);
     }
 
     if (isAdmin || isStaff) {
@@ -155,15 +167,32 @@ export default function Dashboard() {
   // ================= DERIVED STATE =================
 
   const hasActiveSession = data.some(
-    (record) => record.check_out_time === null
+    (record) =>
+      !record.check_out_time ||
+      record.check_out_time === null
   );
 
-  const subscriptionStatus = subscription?.status?.toLowerCase();
+  const subscriptionStatus =
+    subscription?.status?.toLowerCase();
+
+  const subscriptionEndDate = subscription?.end_date
+    ? new Date(subscription.end_date)
+    : null;
+
+  const subscriptionDaysRemaining = subscriptionEndDate
+    ? Math.max(
+      0,
+      Math.ceil(
+        (subscriptionEndDate.getTime() - Date.now()) /
+        (1000 * 60 * 60 * 24)
+      )
+    )
+    : 0;
 
   const canCheckIn =
     !isMember ||
     (subscriptionStatus === "active" &&
-      subscription?.days_remaining > 0);
+      subscriptionDaysRemaining > 0);
 
   const disableCheckIn =
     !memberId ||
@@ -260,6 +289,13 @@ export default function Dashboard() {
 
           {/* ===== MEMBER PROFILE CARD ===== */}
           {isMember && <MemberProfileCard user={user} />}
+
+          {/* ===== SUBSCRIPTION HISTORY ===== */}
+          {isMember && (
+            <SubscriptionHistoryCard
+              subscriptions={subscriptionHistory}
+            />
+          )}
 
           {/* ===== MAIN GRID ===== */}
           <div className="grid md:grid-cols-3 gap-6">
