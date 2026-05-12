@@ -33,7 +33,6 @@ export const deletePlan = async (planId: number) => {
   return res.data;
 };
 
-
 export const assignPlan = async (
   memberId: number,
   planId: number
@@ -44,16 +43,35 @@ export const assignPlan = async (
   });
 };
 
-export const getMemberSubscription = async (memberId: number) => {
-  const res = await apiClient.get(`/subscriptions/member/${memberId}`);
-  return res.data.data;
+
+export const getMemberSubscription = async (
+  memberId: number
+) => {
+  const res = await apiClient.get(
+    `/subscriptions/member/${memberId}`
+  );
+
+  const subscriptions = res.data.data || [];
+
+  if (!Array.isArray(subscriptions) || subscriptions.length === 0) {
+    return null;
+  }
+
+  const activeSubscription = subscriptions.find(
+    (sub: any) =>
+      sub.status?.toLowerCase() === "active"
+  );
+
+  return activeSubscription || subscriptions[0];
 };
+
 
 export const getMemberSubscriptions = async (
   memberId: number
 ) => {
   const res = await apiClient.get(
-    `/subscriptions/member/${memberId}/history`
+    `/subscriptions/member/${memberId}`
   );
-  return res.data.data;
+
+  return res.data.data || [];
 };
