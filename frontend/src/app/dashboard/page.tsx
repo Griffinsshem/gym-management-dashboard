@@ -7,6 +7,8 @@ import {
   ClipboardList,
   Loader2,
   TrendingUp,
+  ShieldCheck,
+  Clock3,
 } from "lucide-react";
 import StatsCard from "@/components/StatsCard";
 import AttendanceTable from "@/components/AttendanceTable";
@@ -14,7 +16,10 @@ import AttendanceChart from "@/components/dashboard/AttendanceChart";
 import MemberSubscriptionCard from "@/components/dashboard/MemberSubscriptionCard";
 import AssignPlanModal from "@/components/subscriptions/AssignPlanModal";
 import { apiClient } from "@/lib/api";
-import { getMemberSubscription, getMemberSubscriptions } from "@/lib/subscription";
+import {
+  getMemberSubscription,
+  getMemberSubscriptions,
+} from "@/lib/subscription";
 import MemberProfileCard from "@/components/dashboard/MemberProfileCard";
 import SubscriptionHistoryCard from "@/components/dashboard/SubscriptionHistoryCard";
 import toast from "react-hot-toast";
@@ -32,7 +37,6 @@ export default function Dashboard() {
   const [openRenewModal, setOpenRenewModal] = useState(false);
   const [subscription, setSubscription] = useState<any>(null);
   const [subscriptionHistory, setSubscriptionHistory] = useState<any[]>([]);
-
 
   const [stats, setStats] = useState({
     total_revenue: 0,
@@ -200,16 +204,43 @@ export default function Dashboard() {
     checkingIn ||
     !canCheckIn;
 
+  // ================= UI =================
+
   return (
-    <div className="flex bg-gray-100">
+    <div className="flex bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50">
       <div className="flex-1 min-h-screen">
-        <div className="p-6 max-w-7xl mx-auto space-y-6">
+        <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-8">
           {/* ===== HERO ===== */}
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 rounded-xl shadow">
-            <h2 className="text-xl font-semibold">Welcome back 👋</h2>
-            <p className="text-sm opacity-90">
-              Here's what's happening in your gym today
-            </p>
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-8 shadow-2xl text-white">
+            <div className="absolute inset-0 bg-black/10" />
+            <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div>
+                <p className="text-sm uppercase tracking-[0.2em] text-blue-100 font-medium">
+                  Dashboard Overview
+                </p>
+                <h1 className="text-3xl font-bold mt-2">
+                  Welcome back{user?.email ? "," : ""} 👋
+                </h1>
+                <p className="mt-2 text-blue-100 max-w-2xl">
+                  Here's what's happening in your gym today.
+                  Track your attendance, membership, and progress in one place.
+                </p>
+              </div>
+
+              {isMember && subscription && (
+                <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-5 py-4 min-w-[240px]">
+                  <p className="text-xs uppercase tracking-wide text-blue-100 mb-1">
+                    Current Plan
+                  </p>
+                  <p className="text-xl font-bold">
+                    {subscription.plan_name}
+                  </p>
+                  <p className="text-sm text-blue-100 mt-1">
+                    {subscriptionDaysRemaining} days remaining
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* ===== STATS (ADMIN + STAFF ONLY) ===== */}
@@ -233,152 +264,193 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* ===== QUICK ACTIONS (ALL USERS) ===== */}
-          <div className="bg-white rounded-xl shadow p-5">
-            <div className="flex gap-4">
-              <button
-                onClick={handleCheckIn}
-                disabled={disableCheckIn}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium text-white transition ${disableCheckIn
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-green-600 hover:bg-green-700 shadow"
-                  }`}
-              >
-                {checkingIn && (
-                  <Loader2 className="animate-spin w-4 h-4" />
-                )}
-                {checkingIn ? "Checking In..." : "Check In"}
-              </button>
-
-              <button
-                onClick={handleCheckOut}
-                disabled={
-                  !memberId ||
-                  !hasActiveSession ||
-                  checkingOut
-                }
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium text-white transition ${!memberId ||
-                  !hasActiveSession ||
-                  checkingOut
-                  ? "bg-gray-500"
-                  : "bg-red-600 hover:bg-red-700 shadow"
-                  }`}
-              >
-                {checkingOut && (
-                  <Loader2 className="animate-spin w-4 h-4" />
-                )}
-                {checkingOut ? "Checking Out..." : "Check Out"}
-              </button>
-            </div>
-
-            {/* ===== MEMBER WARNING ===== */}
-            {isMember && !canCheckIn && (
-              <p className="text-sm text-red-600 mt-3">
-                Your membership is inactive or expired.
-                Please contact the gym to renew.
-              </p>
-            )}
-          </div>
-
-          {/* ===== MEMBER SUBSCRIPTION CARD ===== */}
-          {isMember && (
-            <MemberSubscriptionCard
-              subscription={subscription}
-            />
-          )}
-
-          {/* ===== MEMBER PROFILE CARD ===== */}
-          {isMember && <MemberProfileCard user={user} />}
-
-          {/* ===== SUBSCRIPTION HISTORY ===== */}
-          {isMember && (
-            <SubscriptionHistoryCard
-              subscriptions={subscriptionHistory}
-            />
-          )}
-
-          {/* ===== MAIN GRID ===== */}
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* LEFT */}
-            <div className="md:col-span-2 bg-white rounded-xl shadow p-5">
-              <h3 className="text-sm font-semibold text-gray-900 mb-4">
-                Recent Attendance
-              </h3>
-
-              {loading ? (
-                <p className="text-gray-400 text-sm">
-                  Loading...
+          {/* ===== QUICK ACTIONS ===== */}
+          <div className="bg-white/90 backdrop-blur-sm rounded-3xl border border-gray-100 shadow-xl p-6">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Quick Actions
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Manage your attendance with a single click.
                 </p>
-              ) : (
-                <AttendanceTable data={data} />
-              )}
+              </div>
+
+              <div className="flex flex-wrap gap-4">
+                <button
+                  onClick={handleCheckIn}
+                  disabled={disableCheckIn}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-all ${disableCheckIn
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-green-600 hover:bg-green-700 shadow-lg hover:shadow-xl"
+                    }`}
+                >
+                  {checkingIn && (
+                    <Loader2 className="animate-spin w-4 h-4" />
+                  )}
+                  {checkingIn ? "Checking In..." : "Check In"}
+                </button>
+
+                <button
+                  onClick={handleCheckOut}
+                  disabled={
+                    !memberId ||
+                    !hasActiveSession ||
+                    checkingOut
+                  }
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-all ${!memberId ||
+                      !hasActiveSession ||
+                      checkingOut
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-red-600 hover:bg-red-700 shadow-lg hover:shadow-xl"
+                    }`}
+                >
+                  {checkingOut && (
+                    <Loader2 className="animate-spin w-4 h-4" />
+                  )}
+                  {checkingOut ? "Checking Out..." : "Check Out"}
+                </button>
+              </div>
             </div>
 
-            {/* RIGHT (ONLY ADMIN + STAFF) */}
-            {(isAdmin || isStaff) && (
-              <div className="bg-white rounded-xl shadow p-5">
-                <h3 className="text-sm font-bold text-gray-900 mb-4">
-                  Expiring Soon
-                </h3>
-
-                {expiringSubs.length === 0 ? (
-                  <p className="text-gray-500 text-sm">
-                    No subscriptions expiring soon
-                  </p>
-                ) : (
-                  <div className="space-y-3">
-                    {expiringSubs.map((sub) => (
-                      <div
-                        key={sub.id}
-                        className="p-3 border rounded-lg flex justify-between items-center hover:bg-gray-50"
-                      >
-                        <div>
-                          <p className="text-sm font-medium">
-                            {sub.member_name ||
-                              `Member #${sub.member_id}`}
-                          </p>
-                          <p className="text-xs text-red-500">
-                            Ends:{" "}
-                            {new Date(
-                              sub.end_date
-                            ).toLocaleDateString()}
-                          </p>
-                        </div>
-
-                        {/* ONLY ADMIN CAN RENEW */}
-                        {isAdmin && (
-                          <button
-                            onClick={() => {
-                              setSelectedMember({
-                                id: sub.member_id,
-                                full_name:
-                                  sub.member_name ||
-                                  `Member #${sub.member_id}`,
-                              });
-                              setOpenRenewModal(true);
-                            }}
-                            className="text-xs px-3 py-1 bg-blue-600 text-white rounded"
-                          >
-                            Renew
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
+            {isMember && !canCheckIn && (
+              <div className="mt-4 flex items-start gap-2 text-sm text-red-600 bg-red-50 border border-red-100 rounded-xl p-4">
+                <ShieldCheck className="w-4 h-4 mt-0.5" />
+                <span>
+                  Your membership is inactive or expired.
+                  Please contact the gym to renew.
+                </span>
               </div>
             )}
           </div>
 
-          {/* ===== CHART (ALL USERS) ===== */}
-          <div className="bg-white rounded-xl shadow p-5">
-            <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
-              <TrendingUp size={16} />
-              Attendance Trends
-            </h3>
+          {/* ===== MEMBER PREMIUM GRID ===== */}
+          {isMember && (
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+              {/* LEFT COLUMN */}
+              <div className="xl:col-span-2 space-y-6">
+                <MemberSubscriptionCard
+                  subscription={subscription}
+                />
 
-            <AttendanceChart data={data} />
-          </div>
+                <div className="bg-white rounded-3xl border border-gray-100 shadow-xl p-6">
+                  <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                    <TrendingUp size={16} />
+                    Attendance Trends
+                  </h3>
+                  <AttendanceChart data={data} />
+                </div>
+
+                <div className="bg-white rounded-3xl border border-gray-100 shadow-xl p-6">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <Clock3 size={16} />
+                    Recent Attendance
+                  </h3>
+
+                  {loading ? (
+                    <p className="text-gray-400 text-sm">
+                      Loading...
+                    </p>
+                  ) : (
+                    <AttendanceTable data={data} />
+                  )}
+                </div>
+              </div>
+
+              {/* RIGHT COLUMN */}
+              <div className="space-y-6">
+                <MemberProfileCard user={user} />
+                <SubscriptionHistoryCard
+                  subscriptions={subscriptionHistory}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* ===== ADMIN/STAFF LAYOUT ===== */}
+          {!isMember && (
+            <>
+              <div className="grid md:grid-cols-3 gap-6">
+                {/* LEFT */}
+                <div className="md:col-span-2 bg-white rounded-3xl border border-gray-100 shadow-xl p-6">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-4">
+                    Recent Attendance
+                  </h3>
+
+                  {loading ? (
+                    <p className="text-gray-400 text-sm">
+                      Loading...
+                    </p>
+                  ) : (
+                    <AttendanceTable data={data} />
+                  )}
+                </div>
+
+                {/* RIGHT */}
+                {(isAdmin || isStaff) && (
+                  <div className="bg-white rounded-3xl border border-gray-100 shadow-xl p-6">
+                    <h3 className="text-sm font-bold text-gray-900 mb-4">
+                      Expiring Soon
+                    </h3>
+
+                    {expiringSubs.length === 0 ? (
+                      <p className="text-gray-500 text-sm">
+                        No subscriptions expiring soon
+                      </p>
+                    ) : (
+                      <div className="space-y-3">
+                        {expiringSubs.map((sub) => (
+                          <div
+                            key={sub.id}
+                            className="p-3 border rounded-xl flex justify-between items-center hover:bg-gray-50"
+                          >
+                            <div>
+                              <p className="text-sm font-medium">
+                                {sub.member_name ||
+                                  `Member #${sub.member_id}`}
+                              </p>
+                              <p className="text-xs text-red-500">
+                                Ends:{" "}
+                                {new Date(
+                                  sub.end_date
+                                ).toLocaleDateString()}
+                              </p>
+                            </div>
+
+                            {isAdmin && (
+                              <button
+                                onClick={() => {
+                                  setSelectedMember({
+                                    id: sub.member_id,
+                                    full_name:
+                                      sub.member_name ||
+                                      `Member #${sub.member_id}`,
+                                  });
+                                  setOpenRenewModal(true);
+                                }}
+                                className="text-xs px-3 py-1 bg-blue-600 text-white rounded-lg"
+                              >
+                                Renew
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-white rounded-3xl border border-gray-100 shadow-xl p-6">
+                <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                  <TrendingUp size={16} />
+                  Attendance Trends
+                </h3>
+
+                <AttendanceChart data={data} />
+              </div>
+            </>
+          )}
         </div>
       </div>
 
