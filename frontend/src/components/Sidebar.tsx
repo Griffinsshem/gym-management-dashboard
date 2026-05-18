@@ -10,6 +10,9 @@ import {
   UserCog,
   LogOut,
   Dumbbell,
+  User,
+  CalendarDays,
+  TrendingUp,
 } from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext";
@@ -27,6 +30,28 @@ export default function Sidebar() {
       icon: LayoutDashboard,
       roles: ["admin", "staff", "member"],
     },
+
+    // ===== MEMBER NAVIGATION =====
+    {
+      name: "My Profile",
+      href: "/dashboard/profile",
+      icon: User,
+      roles: ["member"],
+    },
+    {
+      name: "Attendance",
+      href: "/dashboard/attendance",
+      icon: CalendarDays,
+      roles: ["member"],
+    },
+    {
+      name: "Attendance Trends",
+      href: "/dashboard/trends",
+      icon: TrendingUp,
+      roles: ["member"],
+    },
+
+    // ===== ADMIN / STAFF NAVIGATION =====
     {
       name: "Members",
       href: "/members",
@@ -67,10 +92,8 @@ export default function Sidebar() {
 
   return (
     <div className="w-64 h-screen bg-gray-900 text-gray-200 flex flex-col justify-between p-5 border-r border-gray-800">
-
       {/* TOP */}
       <div>
-
         {/* LOGO */}
         <div className="mb-10">
           <div className="flex items-center gap-2">
@@ -115,7 +138,10 @@ export default function Sidebar() {
                   size={18}
                   className={`
                     transition-transform duration-200
-                    ${isActive ? "scale-110" : "group-hover:scale-105"}
+                    ${isActive
+                      ? "scale-110"
+                      : "group-hover:scale-105"
+                    }
                   `}
                 />
 
@@ -132,7 +158,6 @@ export default function Sidebar() {
 
       {/* BOTTOM */}
       <div className="border-t border-gray-800 pt-4">
-
         {/* USER INFO */}
         <div className="mb-4 px-3">
           <p className="text-sm font-medium text-white truncate">
