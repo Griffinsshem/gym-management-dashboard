@@ -6,37 +6,38 @@ import {
   Activity,
   ClipboardList,
   Loader2,
-  TrendingUp,
   ShieldCheck,
-  Clock3,
 } from "lucide-react";
+
 import StatsCard from "@/components/StatsCard";
-import AttendanceTable from "@/components/AttendanceTable";
-import AttendanceChart from "@/components/dashboard/AttendanceChart";
 import MemberSubscriptionCard from "@/components/dashboard/MemberSubscriptionCard";
 import AssignPlanModal from "@/components/subscriptions/AssignPlanModal";
+
 import { apiClient } from "@/lib/api";
 import {
   getMemberSubscription,
   getMemberSubscriptions,
 } from "@/lib/subscription";
-import MemberProfileCard from "@/components/dashboard/MemberProfileCard";
+
 import SubscriptionHistoryCard from "@/components/dashboard/SubscriptionHistoryCard";
+
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
 
-export default function Dashboard() {
+export default function DashboardPage() {
   const { user, isAdmin, isStaff, isMember } = useAuth();
 
-  const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [checkingIn, setCheckingIn] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
+
+  const [attendanceData, setAttendanceData] = useState<any[]>([]);
   const [expiringSubs, setExpiringSubs] = useState<any[]>([]);
   const [selectedMember, setSelectedMember] = useState<any>(null);
   const [openRenewModal, setOpenRenewModal] = useState(false);
+
   const [subscription, setSubscription] = useState<any>(null);
-  const [subscriptionHistory, setSubscriptionHistory] = useState<any[]>([]);
+  const [subscriptionHistory, setSubscriptionHistory] =
+    useState<any[]>([]);
 
   const [stats, setStats] = useState({
     total_revenue: 0,
@@ -46,32 +47,35 @@ export default function Dashboard() {
 
   const memberId = user?.member_id;
 
-  // ================= FETCH =================
+  // ================= FETCH FUNCTIONS =================
 
   const fetchAttendance = async (id: number) => {
     try {
-      setLoading(true);
-      const res = await apiClient.get(`/attendance/member/${id}`);
-      setData(res.data.data);
+      const res = await apiClient.get(
+        `/attendance/member/${id}`
+      );
+      setAttendanceData(res.data.data);
     } catch {
-      setData([]);
-    } finally {
-      setLoading(false);
+      setAttendanceData([]);
     }
   };
 
   const fetchDashboardStats = async () => {
     try {
-      const res = await apiClient.get("/subscriptions/dashboard/stats");
+      const res = await apiClient.get(
+        "/subscriptions/dashboard/stats"
+      );
       setStats(res.data.data);
     } catch {
-      toast.error("Failed to load stats");
+      toast.error("Failed to load dashboard stats");
     }
   };
 
   const fetchExpiring = async () => {
     try {
-      const res = await apiClient.get("/subscriptions/expiring");
+      const res = await apiClient.get(
+        "/subscriptions/expiring"
+      );
       setExpiringSubs(res.data.data);
     } catch {
       toast.error("Failed to load expiring subscriptions");
@@ -87,7 +91,9 @@ export default function Dashboard() {
     }
   };
 
-  const fetchSubscriptionHistory = async (id: number) => {
+  const fetchSubscriptionHistory = async (
+    id: number
+  ) => {
     try {
       const data = await getMemberSubscriptions(id);
       setSubscriptionHistory(data);
@@ -95,6 +101,8 @@ export default function Dashboard() {
       setSubscriptionHistory([]);
     }
   };
+
+  // ================= INITIAL LOAD =================
 
   useEffect(() => {
     if (!memberId) return;
@@ -112,65 +120,9 @@ export default function Dashboard() {
     }
   }, [memberId, isAdmin, isStaff, isMember]);
 
-  // ================= ACTIONS =================
-
-  const handleCheckIn = async () => {
-    if (!memberId) return;
-
-    try {
-      setCheckingIn(true);
-
-      await apiClient.post("/attendance/check-in", {
-        member_id: memberId,
-      });
-
-      toast.success("Checked in");
-      fetchAttendance(memberId);
-
-      if (isMember) {
-        fetchSubscription(memberId);
-      }
-
-      if (isAdmin || isStaff) {
-        fetchDashboardStats();
-      }
-    } catch (err: any) {
-      toast.error(err.response?.data?.error || "Check-in failed");
-    } finally {
-      setCheckingIn(false);
-    }
-  };
-
-  const handleCheckOut = async () => {
-    if (!memberId) return;
-
-    try {
-      setCheckingOut(true);
-
-      await apiClient.post("/attendance/check-out", {
-        member_id: memberId,
-      });
-
-      toast.success("Checked out");
-      fetchAttendance(memberId);
-
-      if (isMember) {
-        fetchSubscription(memberId);
-      }
-
-      if (isAdmin || isStaff) {
-        fetchDashboardStats();
-      }
-    } catch (err: any) {
-      toast.error(err.response?.data?.error || "Check-out failed");
-    } finally {
-      setCheckingOut(false);
-    }
-  };
-
   // ================= DERIVED STATE =================
 
-  const hasActiveSession = data.some(
+  const hasActiveSession = attendanceData.some(
     (record) =>
       !record.check_out_time ||
       record.check_out_time === null
@@ -187,7 +139,8 @@ export default function Dashboard() {
     ? Math.max(
       0,
       Math.ceil(
-        (subscriptionEndDate.getTime() - Date.now()) /
+        (subscriptionEndDate.getTime() -
+          Date.now()) /
         (1000 * 60 * 60 * 24)
       )
     )
@@ -204,6 +157,75 @@ export default function Dashboard() {
     checkingIn ||
     !canCheckIn;
 
+  const disableCheckOut =
+    !memberId ||
+    !hasActiveSession ||
+    checkingOut;
+
+  // ================= ACTIONS =================
+
+  const handleCheckIn = async () => {
+    if (!memberId) return;
+
+    try {
+      setCheckingIn(true);
+
+      await apiClient.post("/attendance/check-in", {
+        member_id: memberId,
+      });
+
+      toast.success("Checked in");
+
+      fetchAttendance(memberId);
+
+      if (isMember) {
+        fetchSubscription(memberId);
+      }
+
+      if (isAdmin || isStaff) {
+        fetchDashboardStats();
+      }
+    } catch (err: any) {
+      toast.error(
+        err.response?.data?.error ||
+        "Check-in failed"
+      );
+    } finally {
+      setCheckingIn(false);
+    }
+  };
+
+  const handleCheckOut = async () => {
+    if (!memberId) return;
+
+    try {
+      setCheckingOut(true);
+
+      await apiClient.post("/attendance/check-out", {
+        member_id: memberId,
+      });
+
+      toast.success("Checked out");
+
+      fetchAttendance(memberId);
+
+      if (isMember) {
+        fetchSubscription(memberId);
+      }
+
+      if (isAdmin || isStaff) {
+        fetchDashboardStats();
+      }
+    } catch (err: any) {
+      toast.error(
+        err.response?.data?.error ||
+        "Check-out failed"
+      );
+    } finally {
+      setCheckingOut(false);
+    }
+  };
+
   // ================= UI =================
 
   return (
@@ -213,17 +235,20 @@ export default function Dashboard() {
           {/* ===== HERO ===== */}
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-8 shadow-2xl text-white">
             <div className="absolute inset-0 bg-black/10" />
+
             <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
               <div>
                 <p className="text-sm uppercase tracking-[0.2em] text-blue-100 font-medium">
                   Dashboard Overview
                 </p>
+
                 <h1 className="text-3xl font-bold mt-2">
-                  Welcome back{user?.email ? "," : ""} 👋
+                  Welcome back 👋
                 </h1>
+
                 <p className="mt-2 text-blue-100 max-w-2xl">
-                  Here's what's happening in your gym today.
-                  Track your attendance, membership, and progress in one place.
+                  Track your membership, attendance,
+                  and gym activity from one place.
                 </p>
               </div>
 
@@ -232,18 +257,21 @@ export default function Dashboard() {
                   <p className="text-xs uppercase tracking-wide text-blue-100 mb-1">
                     Current Plan
                   </p>
+
                   <p className="text-xl font-bold">
                     {subscription.plan_name}
                   </p>
+
                   <p className="text-sm text-blue-100 mt-1">
-                    {subscriptionDaysRemaining} days remaining
+                    {subscriptionDaysRemaining} days
+                    remaining
                   </p>
                 </div>
               )}
             </div>
           </div>
 
-          {/* ===== STATS (ADMIN + STAFF ONLY) ===== */}
+          {/* ===== ADMIN/STATS ===== */}
           {(isAdmin || isStaff) && (
             <div className="grid md:grid-cols-3 gap-6 text-gray-700">
               <StatsCard
@@ -251,11 +279,13 @@ export default function Dashboard() {
                 value={`KES ${stats.total_revenue}`}
                 icon={<ClipboardList />}
               />
+
               <StatsCard
                 title="Active Subscriptions"
                 value={stats.active_subscriptions.toString()}
                 icon={<Activity />}
               />
+
               <StatsCard
                 title="Expiring Soon"
                 value={stats.expiring_soon.toString()}
@@ -271,8 +301,10 @@ export default function Dashboard() {
                 <h2 className="text-lg font-semibold text-gray-900">
                   Quick Actions
                 </h2>
+
                 <p className="text-sm text-gray-500 mt-1">
-                  Manage your attendance with a single click.
+                  Manage your attendance with one
+                  click.
                 </p>
               </div>
 
@@ -286,29 +318,27 @@ export default function Dashboard() {
                     }`}
                 >
                   {checkingIn && (
-                    <Loader2 className="animate-spin w-4 h-4" />
+                    <Loader2 className="w-4 h-4 animate-spin" />
                   )}
-                  {checkingIn ? "Checking In..." : "Check In"}
+                  {checkingIn
+                    ? "Checking In..."
+                    : "Check In"}
                 </button>
 
                 <button
                   onClick={handleCheckOut}
-                  disabled={
-                    !memberId ||
-                    !hasActiveSession ||
-                    checkingOut
-                  }
-                  className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-all ${!memberId ||
-                      !hasActiveSession ||
-                      checkingOut
+                  disabled={disableCheckOut}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-all ${disableCheckOut
                       ? "bg-gray-400 cursor-not-allowed"
                       : "bg-red-600 hover:bg-red-700 shadow-lg hover:shadow-xl"
                     }`}
                 >
                   {checkingOut && (
-                    <Loader2 className="animate-spin w-4 h-4" />
+                    <Loader2 className="w-4 h-4 animate-spin" />
                   )}
-                  {checkingOut ? "Checking Out..." : "Check Out"}
+                  {checkingOut
+                    ? "Checking Out..."
+                    : "Check Out"}
                 </button>
               </div>
             </div>
@@ -317,155 +347,108 @@ export default function Dashboard() {
               <div className="mt-4 flex items-start gap-2 text-sm text-red-600 bg-red-50 border border-red-100 rounded-xl p-4">
                 <ShieldCheck className="w-4 h-4 mt-0.5" />
                 <span>
-                  Your membership is inactive or expired.
-                  Please contact the gym to renew.
+                  Your membership is inactive or
+                  expired. Please contact the gym to
+                  renew.
                 </span>
               </div>
             )}
           </div>
 
-          {/* ===== MEMBER PREMIUM GRID ===== */}
+          {/* ===== MEMBER OVERVIEW ===== */}
           {isMember && (
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-              {/* LEFT COLUMN */}
-              <div className="xl:col-span-2 space-y-6">
+              <div className="xl:col-span-2">
                 <MemberSubscriptionCard
                   subscription={subscription}
                 />
-
-                <div className="bg-white rounded-3xl border border-gray-100 shadow-xl p-6">
-                  <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                    <TrendingUp size={16} />
-                    Attendance Trends
-                  </h3>
-                  <AttendanceChart data={data} />
-                </div>
-
-                <div className="bg-white rounded-3xl border border-gray-100 shadow-xl p-6">
-                  <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <Clock3 size={16} />
-                    Recent Attendance
-                  </h3>
-
-                  {loading ? (
-                    <p className="text-gray-400 text-sm">
-                      Loading...
-                    </p>
-                  ) : (
-                    <AttendanceTable data={data} />
-                  )}
-                </div>
               </div>
 
-              {/* RIGHT COLUMN */}
-              <div className="space-y-6">
-                <MemberProfileCard user={user} />
+              <div>
                 <SubscriptionHistoryCard
-                  subscriptions={subscriptionHistory}
+                  subscriptions={
+                    subscriptionHistory.slice(0, 5)
+                  }
                 />
               </div>
             </div>
           )}
 
-          {/* ===== ADMIN/STAFF LAYOUT ===== */}
-          {!isMember && (
-            <>
-              <div className="grid md:grid-cols-3 gap-6">
-                {/* LEFT */}
-                <div className="md:col-span-2 bg-white rounded-3xl border border-gray-100 shadow-xl p-6">
-                  <h3 className="text-sm font-semibold text-gray-900 mb-4">
-                    Recent Attendance
-                  </h3>
+          {/* ===== ADMIN/STAFF EXPIRING ===== */}
+          {(isAdmin || isStaff) && (
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-xl p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Expiring Soon
+              </h3>
 
-                  {loading ? (
-                    <p className="text-gray-400 text-sm">
-                      Loading...
-                    </p>
-                  ) : (
-                    <AttendanceTable data={data} />
-                  )}
-                </div>
+              {expiringSubs.length === 0 ? (
+                <p className="text-sm text-gray-500">
+                  No subscriptions expiring soon.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {expiringSubs.map((sub) => (
+                    <div
+                      key={sub.id}
+                      className="p-4 border rounded-2xl flex items-center justify-between hover:bg-gray-50"
+                    >
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">
+                          {sub.member_name ||
+                            `Member #${sub.member_id}`}
+                        </p>
 
-                {/* RIGHT */}
-                {(isAdmin || isStaff) && (
-                  <div className="bg-white rounded-3xl border border-gray-100 shadow-xl p-6">
-                    <h3 className="text-sm font-bold text-gray-900 mb-4">
-                      Expiring Soon
-                    </h3>
-
-                    {expiringSubs.length === 0 ? (
-                      <p className="text-gray-500 text-sm">
-                        No subscriptions expiring soon
-                      </p>
-                    ) : (
-                      <div className="space-y-3">
-                        {expiringSubs.map((sub) => (
-                          <div
-                            key={sub.id}
-                            className="p-3 border rounded-xl flex justify-between items-center hover:bg-gray-50"
-                          >
-                            <div>
-                              <p className="text-sm font-medium">
-                                {sub.member_name ||
-                                  `Member #${sub.member_id}`}
-                              </p>
-                              <p className="text-xs text-red-500">
-                                Ends:{" "}
-                                {new Date(
-                                  sub.end_date
-                                ).toLocaleDateString()}
-                              </p>
-                            </div>
-
-                            {isAdmin && (
-                              <button
-                                onClick={() => {
-                                  setSelectedMember({
-                                    id: sub.member_id,
-                                    full_name:
-                                      sub.member_name ||
-                                      `Member #${sub.member_id}`,
-                                  });
-                                  setOpenRenewModal(true);
-                                }}
-                                className="text-xs px-3 py-1 bg-blue-600 text-white rounded-lg"
-                              >
-                                Renew
-                              </button>
-                            )}
-                          </div>
-                        ))}
+                        <p className="text-xs text-red-500 mt-1">
+                          Ends:{" "}
+                          {new Date(
+                            sub.end_date
+                          ).toLocaleDateString()}
+                        </p>
                       </div>
-                    )}
-                  </div>
-                )}
-              </div>
 
-              <div className="bg-white rounded-3xl border border-gray-100 shadow-xl p-6">
-                <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                  <TrendingUp size={16} />
-                  Attendance Trends
-                </h3>
-
-                <AttendanceChart data={data} />
-              </div>
-            </>
+                      {isAdmin && (
+                        <button
+                          onClick={() => {
+                            setSelectedMember({
+                              id: sub.member_id,
+                              full_name:
+                                sub.member_name ||
+                                `Member #${sub.member_id}`,
+                            });
+                            setOpenRenewModal(true);
+                          }}
+                          className="text-xs px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        >
+                          Renew
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
 
-      {/* ===== MODAL (ADMIN ONLY) ===== */}
-      {isAdmin && openRenewModal && selectedMember && (
-        <AssignPlanModal
-          member={selectedMember}
-          onClose={() => setOpenRenewModal(false)}
-          onAssign={async () => {
-            toast.success("Subscription renewed");
-            fetchDashboardStats();
-            fetchExpiring();
-          }}
-        />
-      )}
+      {/* ===== RENEW MODAL ===== */}
+      {isAdmin &&
+        openRenewModal &&
+        selectedMember && (
+          <AssignPlanModal
+            member={selectedMember}
+            onClose={() =>
+              setOpenRenewModal(false)
+            }
+            onAssign={async () => {
+              toast.success(
+                "Subscription renewed"
+              );
+              fetchDashboardStats();
+              fetchExpiring();
+            }}
+          />
+        )}
     </div>
   );
 }
